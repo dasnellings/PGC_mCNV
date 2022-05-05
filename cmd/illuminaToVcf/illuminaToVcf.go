@@ -198,8 +198,8 @@ func revComp(base string) string {
 		case 'T', 't':
 			ans[j] = 'A'
 		default:
-			log.Panicf("ERROR: unrecognized base '%s'", base)
-			return ""
+			//log.Panicf("ERROR: unrecognized base '%s'", base) // they throw Y's and shit in there
+			ans[j] = base[i]
 		}
 		j++
 	}
