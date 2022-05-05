@@ -99,7 +99,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			}
 
 			// only do partial check on rev comps since if snp is not directl in middle of probe then before/after lengths differ
-		case revComp(stringBefore)[:20] == m.SeqAfter[:20] && revComp(stringAfter)[20:] == m.SeqBefore[20:]:
+		case revComp(stringBefore)[:20] == m.SeqAfter[:20] && revComp(stringAfter)[len(stringAfter)-20:] == m.SeqBefore[len(m.SeqBefore)-20:]:
 			if m.TopStrand {
 				altNeedsRevComp = true
 			}
@@ -114,8 +114,8 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			fmt.Println(stringAfter)
 			fmt.Println(m.SeqAfter)
 			fmt.Println()
-			fmt.Println(revComp(stringAfter)[20:])
-			fmt.Println(m.SeqBefore[20:])
+			fmt.Println(revComp(stringAfter)[len(stringAfter)-20:])
+			fmt.Println(m.SeqBefore[len(m.SeqBefore)-20:])
 			fmt.Println()
 			log.Panicf("ERROR: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
 		}
