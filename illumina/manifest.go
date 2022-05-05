@@ -105,17 +105,23 @@ func processManifestLine(s string) Manifest {
 }
 
 func revComp(base string) string {
-	switch base {
-	case "A", "a":
-		return "T"
-	case "C", "c":
-		return "G"
-	case "G", "g":
-		return "C"
-	case "T", "t":
-		return "A"
-	default:
-		log.Panicf("ERROR: unrecognized base '%s'", base)
-		return ""
+	ans := make([]byte, len(base))
+	var j int
+	for i := len(base) - 1; i >= 0; i-- {
+		switch base[i] {
+		case 'A', 'a':
+			ans[j] = 'T'
+		case 'C', 'c':
+			ans[j] = 'G'
+		case 'G', 'g':
+			ans[j] = 'C'
+		case 'T', 't':
+			ans[j] = 'A'
+		default:
+			//log.Panicf("ERROR: unrecognized base '%s'", base) // they throw Y's and shit in there
+			ans[j] = base[i]
+		}
+		j++
 	}
+	return string(ans)
 }
