@@ -76,7 +76,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		curr.Chr = m.Chr
 		curr.Pos = m.Pos
 		curr.Id = m.Name
-		refBase, err = fasta.SeekByName(ref, m.Chr, m.Pos-1, m.Pos)
+		refBase, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos-1, m.Pos)
 		exception.PanicOnErr(err)
 		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
 
@@ -86,9 +86,6 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		seqAfter, err = fasta.SeekByName(ref, m.Chr, m.Pos, m.Pos+len(m.SeqAfter))
 		exception.PanicOnErr(err)
 		stringAfter = strings.ToUpper(dna.BasesToString(seqAfter))
-
-		fmt.Println(len(seqBefore), len(m.SeqBefore))
-		fmt.Println(len(seqAfter), len(m.SeqAfter))
 
 		// check one of the alleles matches ref
 		altNeedsRevComp = false
