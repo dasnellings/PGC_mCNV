@@ -88,10 +88,11 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		stringAfter = dna.BasesToString(seqAfter)
 
 		// check one of the alleles matches ref
+		altNeedsRevComp = false
 		switch {
 		case stringBefore == m.SeqBefore && stringAfter == m.SeqAfter:
 			if !m.TopStrand {
-				altNeedsRevComp = false
+				altNeedsRevComp = true
 			}
 
 		case revComp(stringBefore) == m.SeqAfter && revComp(stringAfter) == m.SeqBefore:
