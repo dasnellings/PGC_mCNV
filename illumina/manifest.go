@@ -10,7 +10,7 @@ import (
 
 const expectedManifestHeader string = "IlmnID,Name,IlmnStrand,SNP,AddressA_ID,AlleleA_ProbeSeq,AddressB_ID," +
 	"AlleleB_ProbeSeq,GenomeBuild,Chr,MapInfo,Ploidy,Species,Source,SourceVersion,SourceStrand,SourceSeq," +
-	"TopGenomicSeq,BeadSetId\n"
+	"TopGenomicSeq,BeadSetId"
 
 type Manifest struct {
 	IlmnId           string

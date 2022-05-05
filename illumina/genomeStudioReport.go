@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const expectedGsReportHeader string = "SNP Name\tChromosome\tPosition\tAl1Fwd\tAl2Fwd\tX\tY\tB Allele Freq\tLog R Ratio\n"
+const expectedGsReportHeader string = "SNP Name\tChromosome\tPosition\tAl1Fwd\tAl2Fwd\tX\tY\tB Allele Freq\tLog R Ratio"
 
 type GsReport struct {
 	Marker      string
