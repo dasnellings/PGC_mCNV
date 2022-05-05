@@ -98,7 +98,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				altNeedsRevComp = true
 			}
 
-		case revComp(stringBefore) == m.SeqAfter && revComp(stringAfter) == m.SeqBefore:
+		case revComp(stringBefore)[:20] == m.SeqAfter[:20] && revComp(stringAfter)[20:] == m.SeqBefore[20:]:
 			if m.TopStrand {
 				altNeedsRevComp = true
 			}
