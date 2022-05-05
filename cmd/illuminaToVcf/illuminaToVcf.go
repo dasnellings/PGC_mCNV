@@ -78,6 +78,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
 
 		// check one of the alleles matches ref
+		fmt.Println(m)
 		switch curr.Ref {
 		case m.TopStrandAlleleA:
 			curr.Alt = []string{m.TopStrandAlleleB}
