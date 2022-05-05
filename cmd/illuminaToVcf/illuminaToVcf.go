@@ -97,9 +97,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				altNeedsRevComp = true
 			}
 
-			// only do partial check on rev comps since if snp is not directl in middle of probe then before/after lengths differ
-		case levenshtein(revComp(stringBefore)[:20], m.SeqAfter[:20]) <= 2 &&
-			levenshtein(revComp(stringAfter)[len(stringAfter)-20:], m.SeqBefore[len(m.SeqBefore)-20:]) <= 2:
+			// only do partial check on rev comps since if snp is not directly in middle of probe then before/after lengths differ
+		case levenshtein(revComp(stringBefore)[:len(stringBefore)-5], m.SeqAfter[:5]) <= 2 &&
+			levenshtein(revComp(stringAfter)[len(stringAfter)-5:], m.SeqBefore[len(m.SeqBefore)-5:]) <= 2:
 			if m.TopStrand {
 				altNeedsRevComp = true
 			}
@@ -108,14 +108,14 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			fmt.Println(stringBefore)
 			fmt.Println(m.SeqBefore)
 			fmt.Println()
-			fmt.Println(revComp(stringBefore)[:20])
-			fmt.Println(m.SeqAfter[:20])
+			fmt.Println(revComp(stringBefore)[:5])
+			fmt.Println(m.SeqAfter[:5])
 			fmt.Println()
 			fmt.Println(stringAfter)
 			fmt.Println(m.SeqAfter)
 			fmt.Println()
-			fmt.Println(revComp(stringAfter)[len(stringAfter)-20:])
-			fmt.Println(m.SeqBefore[len(m.SeqBefore)-20:])
+			fmt.Println(revComp(stringAfter)[len(stringAfter)-5:])
+			fmt.Println(m.SeqBefore[len(m.SeqBefore)-5:])
 			fmt.Println()
 			log.Panicf("ERROR: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
 		}
