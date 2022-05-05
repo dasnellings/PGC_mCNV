@@ -8,6 +8,7 @@ import (
 	"github.com/vertgenlab/gonomics/exception"
 	"github.com/vertgenlab/gonomics/fasta"
 	"github.com/vertgenlab/gonomics/fileio"
+	"github.com/vertgenlab/gonomics/numbers"
 	"github.com/vertgenlab/gonomics/vcf"
 	"log"
 	"strings"
@@ -90,15 +91,15 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		// check one of the alleles matches ref
 		altNeedsRevComp = false
 		switch {
-		case percentMatch(stringBefore, m.SeqBefore, 0.9) &&
-			percentMatch(stringAfter, m.SeqAfter, 0.9):
+		case levenshtein(stringBefore, m.SeqBefore) <= 2 &&
+			levenshtein(stringAfter, m.SeqAfter) <= 2:
 			if !m.TopStrand {
 				altNeedsRevComp = true
 			}
 
 			// only do partial check on rev comps since if snp is not directl in middle of probe then before/after lengths differ
-		case percentMatch(revComp(stringBefore)[:20], m.SeqAfter[:20], 0.9) &&
-			percentMatch(revComp(stringAfter)[len(stringAfter)-20:], m.SeqBefore[len(m.SeqBefore)-20:], 0.9):
+		case levenshtein(revComp(stringBefore)[:20], m.SeqAfter[:20]) <= 2 &&
+			levenshtein(revComp(stringAfter)[len(stringAfter)-20:], m.SeqBefore[len(m.SeqBefore)-20:]) <= 2:
 			if m.TopStrand {
 				altNeedsRevComp = true
 			}
@@ -205,18 +206,43 @@ func revComp(base string) string {
 	return string(ans)
 }
 
-func percentMatch(a, b string, percent float64) bool {
-	if len(a) != len(b) {
-		return false
+func levenshtein(s1, s2 string) int {
+	if s1 == "" || s2 == "" {
+		return numbers.Max(len(s1), len(s2))
 	}
-	var mismatch int
-	for i := range a {
-		if a[i] != b[i] {
-			mismatch++
+	s1len := len(s1)
+	s2len := len(s2)
+	column := make([]int, len(s1)+1)
+
+	for y := 1; y <= s1len; y++ {
+		column[y] = y
+	}
+	for x := 1; x <= s2len; x++ {
+		column[0] = x
+		lastkey := x - 1
+		for y := 1; y <= s1len; y++ {
+			oldkey := column[y]
+			var incr int
+			if s1[y-1] != s2[x-1] {
+				incr = 1
+			}
+
+			column[y] = minimum(column[y]+1, column[y-1]+1, lastkey+incr)
+			lastkey = oldkey
 		}
 	}
-	if float64(len(a)-mismatch)/float64(len(a)) >= percent {
-		return true
+	return column[s1len]
+}
+
+func minimum(a, b, c int) int {
+	if a < b {
+		if a < c {
+			return a
+		}
+	} else {
+		if b < c {
+			return b
+		}
 	}
-	return false
+	return c
 }
