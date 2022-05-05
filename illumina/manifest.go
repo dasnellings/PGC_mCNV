@@ -40,6 +40,7 @@ func readManifestToChan(filename string, ans chan<- Manifest) {
 		fmt.Println(line)
 		if throughHeader {
 			ans <- processManifestLine(line)
+			continue
 		}
 		if !strings.HasPrefix(line, "IlmnId") {
 			continue
