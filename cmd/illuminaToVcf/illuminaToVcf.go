@@ -140,7 +140,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			alleleBint = 0
 			curr.Alt = []string{alleleA}
 		default:
-			log.Panicf("ERROR: alternate alleles did not match reference\n%v\n", m)
+			if alleleA != "X" || alleleB != "X" { // what the hell illumina...
+				log.Panicf("ERROR: alternate alleles did not match reference\n%v\n", m)
+			}
 		}
 
 		curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%g", alleleAint, alleleBint, m.GC)
