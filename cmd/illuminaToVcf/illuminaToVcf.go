@@ -128,6 +128,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			alleleA = m.AlleleA
 			alleleB = m.AlleleB
 		}
+		fmt.Println(alleleA, alleleB)
 
 		switch curr.Ref {
 		case alleleA:
