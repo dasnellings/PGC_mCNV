@@ -169,7 +169,7 @@ func matchesManifest(gs illumina.GsReport, m illumina.Manifest) bool {
 func revComp(base string) string {
 	ans := make([]byte, len(base))
 	var j int
-	for i := len(base); i >= 0; i-- {
+	for i := len(base) - 1; i >= 0; i-- {
 		switch base[i] {
 		case 'A', 'a':
 			ans[j] = 'T'
