@@ -94,7 +94,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		switch {
 		case levenshtein(stringBefore, m.SeqBefore) <= 5 &&
 			levenshtein(stringAfter, m.SeqAfter) <= 5:
+			fmt.Println("this is true")
 			if !m.TopStrand {
+				fmt.Println("we must rev comp")
 				altNeedsRevComp = true
 			}
 
