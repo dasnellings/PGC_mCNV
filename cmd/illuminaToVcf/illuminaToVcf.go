@@ -73,7 +73,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	var altNeedsRevComp bool
 
 	for m := range manifestData {
-		curr.Chr = m.Chr
+		curr.Chr = "chr" + strings.TrimLeft(m.Chr, "chr")
 		curr.Pos = m.Pos
 		curr.Id = m.Name
 		refBase, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos-1, m.Pos)
@@ -126,9 +126,11 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		case m.AlleleA:
 			alleleAint = 0
 			alleleBint = 1
+			curr.Alt = []string{m.AlleleB}
 		case m.AlleleB:
 			alleleAint = 1
 			alleleBint = 0
+			curr.Alt = []string{m.AlleleA}
 		default:
 			log.Panicf("ERROR: alternate alleles did not match reference\n%v\n", m)
 		}
