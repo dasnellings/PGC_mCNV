@@ -172,7 +172,7 @@ func matchesManifest(gs illumina.GsReport, m illumina.Manifest) bool {
 	if strings.ToUpper(gs.Marker) != strings.ToUpper(m.Name) {
 		return false
 	}
-	if "chr"+strings.ToUpper(gs.Chrom) != m.Chr {
+	if "chr"+strings.ToUpper(gs.Chrom) != "chr"+strings.TrimLeft(m.Chr, "chr") {
 		return false
 	}
 	if gs.Pos != m.Pos {
