@@ -68,7 +68,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	sb := new(strings.Builder)
 	var alleleAint, alleleBint int16
 	var seqBefore, seqAfter []dna.Base
+	var stringBefore, stringAfter string
 	var refBase []dna.Base
+	var altNeedsRevComp bool
 
 	for m := range manifestData {
 		curr.Chr = m.Chr
@@ -80,17 +82,38 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 		seqBefore, err = fasta.SeekByName(ref, m.Chr, (m.Pos-1)-len(m.SeqBefore), m.Pos-1)
 		exception.PanicOnErr(err)
+		stringBefore = dna.BasesToString(seqBefore)
 		seqAfter, err = fasta.SeekByName(ref, m.Chr, m.Pos, m.Pos+len(m.SeqAfter))
 		exception.PanicOnErr(err)
-
-		fmt.Println(m.TopStrand)
-		fmt.Println(dna.BasesToString(seqBefore))
-		fmt.Println(m.SeqBefore)
-		fmt.Println(dna.BasesToString(seqAfter))
-		fmt.Println(m.SeqAfter)
-		fmt.Println()
+		stringAfter = dna.BasesToString(seqAfter)
 
 		// check one of the alleles matches ref
+		switch {
+		case stringBefore == m.SeqBefore && stringAfter == m.SeqAfter:
+			altNeedsRevComp = false
+
+		case revComp(stringBefore) == m.SeqAfter && revComp(stringAfter) == m.SeqBefore:
+			altNeedsRevComp = true
+
+		default:
+			log.Panicf("ERROR: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
+		}
+
+		if altNeedsRevComp {
+			m.AlleleA = revComp(m.AlleleA)
+			m.AlleleB = revComp(m.AlleleB)
+		}
+
+		switch curr.Ref {
+		case m.AlleleA:
+			alleleAint = 0
+			alleleBint = 1
+		case m.AlleleB:
+			alleleAint = 1
+			alleleBint = 0
+		default:
+			log.Panicf("ERROR: alternate alleles did not match reference\n%v\n", m)
+		}
 
 		curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%g", alleleAint, alleleBint, m.GC)
 		curr.Samples = make([]vcf.Sample, len(gsReportChans))
@@ -139,17 +162,23 @@ func matchesManifest(gs illumina.GsReport, m illumina.Manifest) bool {
 }
 
 func revComp(base string) string {
-	switch base {
-	case "A", "a":
-		return "T"
-	case "C", "c":
-		return "G"
-	case "G", "g":
-		return "C"
-	case "T", "t":
-		return "A"
-	default:
-		log.Panicf("ERROR: unrecognized base '%s'", base)
-		return ""
+	ans := make([]byte, len(base))
+	var j int
+	for i := len(base); i >= 0; i-- {
+		switch base[i] {
+		case 'A', 'a':
+			ans[j] = 'T'
+		case 'C', 'c':
+			ans[j] = 'G'
+		case 'G', 'g':
+			ans[j] = 'C'
+		case 'T', 't':
+			ans[j] = 'A'
+		default:
+			log.Panicf("ERROR: unrecognized base '%s'", base)
+			return ""
+		}
+		j++
 	}
+	return string(ans)
 }
