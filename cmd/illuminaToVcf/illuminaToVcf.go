@@ -91,8 +91,8 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		// check one of the alleles matches ref
 		altNeedsRevComp = false
 		switch {
-		case levenshtein(stringBefore, m.SeqBefore) <= 2 &&
-			levenshtein(stringAfter, m.SeqAfter) <= 2:
+		case levenshtein(stringBefore, m.SeqBefore) <= 5 &&
+			levenshtein(stringAfter, m.SeqAfter) <= 5:
 			if !m.TopStrand {
 				altNeedsRevComp = true
 			}
@@ -105,19 +105,19 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			}
 
 		default:
-			fmt.Println(stringBefore)
-			fmt.Println(m.SeqBefore)
-			fmt.Println()
-			fmt.Println(revComp(stringBefore)[:5])
-			fmt.Println(m.SeqAfter[:5])
-			fmt.Println()
-			fmt.Println(stringAfter)
-			fmt.Println(m.SeqAfter)
-			fmt.Println()
-			fmt.Println(revComp(stringAfter)[len(stringAfter)-5:])
-			fmt.Println(m.SeqBefore[len(m.SeqBefore)-5:])
-			fmt.Println()
-			log.Panicf("ERROR: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
+			log.Println(stringBefore)
+			log.Println(m.SeqBefore)
+			log.Println()
+			log.Println(revComp(stringBefore)[:5])
+			log.Println(m.SeqAfter[:5])
+			log.Println()
+			log.Println(stringAfter)
+			log.Println(m.SeqAfter)
+			log.Println()
+			log.Println(revComp(stringAfter)[len(stringAfter)-5:])
+			log.Println(m.SeqBefore[len(m.SeqBefore)-5:])
+			log.Println()
+			log.Printf("ERROR: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
 		}
 
 		if altNeedsRevComp {
