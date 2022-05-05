@@ -215,7 +215,7 @@ func percentMatch(a, b string, percent float64) bool {
 			mismatch++
 		}
 	}
-	if float64(mismatch)/float64(len(a)) >= percent {
+	if float64(len(a)-mismatch)/float64(len(a)) >= percent {
 		return true
 	}
 	return false
