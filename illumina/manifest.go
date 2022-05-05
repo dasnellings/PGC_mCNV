@@ -43,7 +43,7 @@ func readManifestToChan(filename string, ans chan<- Manifest) {
 			continue
 		}
 		if line != expectedManifestHeader {
-			log.Fatal("ERROR: unexpected header. check file.")
+			log.Fatalf("ERROR: unexpected manifest header. check file.\n%s\n%s", line, expectedManifestHeader)
 		}
 		throughHeader = true
 	}

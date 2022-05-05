@@ -33,7 +33,7 @@ func readReportToChan(filename string, ans chan<- GsReport) {
 	for line, done := fileio.EasyNextRealLine(file); !done; line, done = fileio.EasyNextRealLine(file) {
 		if strings.HasPrefix(line, "SNP Name") {
 			if line != expectedGsReportHeader {
-				log.Fatal("ERROR: unexpected header. check file.")
+				log.Fatalf("ERROR: unexpected report header. check file.\n%s\n%s", line, expectedGsReportHeader)
 			}
 			continue
 		}
