@@ -90,13 +90,15 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		// check one of the alleles matches ref
 		altNeedsRevComp = false
 		switch {
-		case stringBefore == m.SeqBefore && stringAfter == m.SeqAfter:
+		case percentMatch(stringBefore, m.SeqBefore, 0.9) &&
+			percentMatch(stringAfter, m.SeqAfter, 0.9):
 			if !m.TopStrand {
 				altNeedsRevComp = true
 			}
 
 			// only do partial check on rev comps since if snp is not directl in middle of probe then before/after lengths differ
-		case revComp(stringBefore)[:20] == m.SeqAfter[:20] && revComp(stringAfter)[len(stringAfter)-20:] == m.SeqBefore[len(m.SeqBefore)-20:]:
+		case percentMatch(revComp(stringBefore)[:20], m.SeqAfter[:20], 0.9) &&
+			percentMatch(revComp(stringAfter)[len(stringAfter)-20:], m.SeqBefore[len(m.SeqBefore)-20:], 0.9):
 			if m.TopStrand {
 				altNeedsRevComp = true
 			}
@@ -201,4 +203,20 @@ func revComp(base string) string {
 		j++
 	}
 	return string(ans)
+}
+
+func percentMatch(a, b string, percent float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	var mismatch int
+	for i := range a {
+		if a[i] != b[i] {
+			mismatch++
+		}
+	}
+	if float64(mismatch)/float64(len(a)) >= percent {
+		return true
+	}
+	return false
 }
