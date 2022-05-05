@@ -87,6 +87,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		exception.PanicOnErr(err)
 		stringAfter = strings.ToUpper(dna.BasesToString(seqAfter))
 
+		fmt.Println(len(seqBefore), len(m.SeqBefore))
+		fmt.Println(len(seqAfter), len(m.SeqAfter))
+
 		// check one of the alleles matches ref
 		altNeedsRevComp = false
 		switch {
