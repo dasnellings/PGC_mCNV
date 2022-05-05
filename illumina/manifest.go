@@ -13,17 +13,17 @@ const expectedManifestHeader string = "IlmnID,Name,IlmnStrand,SNP,AddressA_ID,Al
 	"TopGenomicSeq,BeadSetId"
 
 type Manifest struct {
-	IlmnId           string
-	Name             string
-	Strand           bool
-	AlleleA          string
-	AlleleB          string
-	TopStrandAlleleA string
-	TopStrandAlleleB string
-	GenomeBuild      string
-	Chr              string
-	Pos              int
-	GC               float64
+	IlmnId      string
+	Name        string
+	TopStrand   bool
+	AlleleA     string
+	AlleleB     string
+	SeqBefore   string
+	SeqAfter    string
+	GenomeBuild string
+	Chr         string
+	Pos         int
+	GC          float64
 }
 
 func GoReadManifestToChan(filename string) <-chan Manifest {
@@ -64,30 +64,29 @@ func processManifestLine(s string) Manifest {
 	ans.Name = fields[1]
 	switch fields[2] {
 	case "Top", "TOP":
-		ans.Strand = true
+		ans.TopStrand = true
 	case "Bot", "BOT":
-		ans.Strand = false
+		ans.TopStrand = false
 	default:
 		log.Panicf("Unrecognized strand '%s' in below line\n%s\n", fields[2], s)
 	}
 	var alleles []string
 	alleles = strings.Split(strings.TrimLeft(strings.TrimRight(fields[3], "]"), "["), "/")
-	ans.AlleleA = alleles[0]
-	ans.AlleleB = alleles[1]
-	if ans.Strand {
-		ans.TopStrandAlleleA = ans.AlleleA
-		ans.TopStrandAlleleB = ans.AlleleB
+	if ans.TopStrand {
+		ans.AlleleA = alleles[0]
+		ans.AlleleB = alleles[1]
 	} else {
-		ans.TopStrandAlleleA = revComp(ans.AlleleA)
-		ans.TopStrandAlleleB = revComp(ans.AlleleB)
+		ans.AlleleA = alleles[1]
+		ans.AlleleB = alleles[0]
 	}
 	ans.GenomeBuild = fields[8]
 	ans.Chr = fields[9]
 	ans.Pos, err = strconv.Atoi(fields[10])
 	exception.PanicOnErr(err)
 	var seqContext string
-	seqContext = fields[17][0:strings.Index(fields[17], "[")] + fields[17][strings.Index(fields[17], "]")+1:]
-	seqContext = strings.ToUpper(seqContext)
+	ans.SeqBefore = strings.ToUpper(strings.Split(fields[17], "[")[0])
+	ans.SeqAfter = strings.ToUpper(strings.Split(fields[17], "]")[1])
+	seqContext = ans.SeqBefore + ans.SeqAfter
 	var gcCount int
 	var totalCount int
 	for _, base := range seqContext {

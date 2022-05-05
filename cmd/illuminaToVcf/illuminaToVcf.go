@@ -67,6 +67,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
 	var alleleAint, alleleBint int16
+	var seqBefore, seqAfter []dna.Base
 	var refBase []dna.Base
 
 	for m := range manifestData {
@@ -77,20 +78,19 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		exception.PanicOnErr(err)
 		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
 
+		seqBefore, err = fasta.SeekByName(ref, m.Chr, m.Pos-len(m.SeqBefore), m.Pos-1)
+		exception.PanicOnErr(err)
+		seqBefore, err = fasta.SeekByName(ref, m.Chr, m.Pos, (m.Pos-1)+len(m.SeqAfter))
+		exception.PanicOnErr(err)
+
+		fmt.Println(seqBefore)
+		fmt.Println(m.SeqBefore)
+		fmt.Println(seqAfter)
+		fmt.Println(m.SeqAfter)
+		fmt.Println()
+
 		// check one of the alleles matches ref
-		fmt.Println(m)
-		switch curr.Ref {
-		case m.TopStrandAlleleA:
-			curr.Alt = []string{m.TopStrandAlleleB}
-			alleleAint = 0
-			alleleBint = 1
-		case m.TopStrandAlleleB:
-			curr.Alt = []string{m.TopStrandAlleleA}
-			alleleAint = 1
-			alleleBint = 0
-		default:
-			log.Panicf("ERROR: Reference mismatch. Check '%s'\n", m.Name)
-		}
+
 		curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%g", alleleAint, alleleBint, m.GC)
 		curr.Samples = make([]vcf.Sample, len(gsReportChans))
 
