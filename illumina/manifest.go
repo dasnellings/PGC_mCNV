@@ -1,7 +1,6 @@
 package illumina
 
 import (
-	"fmt"
 	"github.com/vertgenlab/gonomics/exception"
 	"github.com/vertgenlab/gonomics/fileio"
 	"log"
@@ -87,8 +86,7 @@ func processManifestLine(s string) Manifest {
 	ans.Pos, err = strconv.Atoi(fields[10])
 	exception.PanicOnErr(err)
 	var seqContext string
-	fmt.Println(fields[18])
-	seqContext = fields[18][0:strings.Index(fields[18], "[")] + fields[18][strings.Index(fields[18], "]"):]
+	seqContext = fields[17][0:strings.Index(fields[17], "[")] + fields[17][strings.Index(fields[17], "]"):]
 	seqContext = strings.ToUpper(seqContext)
 	var gcCount int
 	var totalCount int
@@ -100,7 +98,7 @@ func processManifestLine(s string) Manifest {
 		case 'T', 'A':
 			totalCount++
 		default:
-			log.Panicf("ERROR: Unknown base in '%s'. Check following line\n%s\n", fields[18], s)
+			log.Panicf("ERROR: Unknown base in '%s'. Check following line\n%s\n", fields[17], s)
 		}
 	}
 	ans.GC = float64(gcCount) / float64(totalCount)
