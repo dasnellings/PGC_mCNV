@@ -63,9 +63,9 @@ func processManifestLine(s string) Manifest {
 	ans.IlmnId = fields[0]
 	ans.Name = fields[1]
 	switch fields[2] {
-	case "Top":
+	case "Top", "TOP":
 		ans.Strand = true
-	case "Bot":
+	case "Bot", "BOT":
 		ans.Strand = false
 	default:
 		log.Panicf("Unrecognized strand '%s' in below line\n%s\n", fields[2], s)
