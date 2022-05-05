@@ -68,6 +68,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
 	var alleleAint, alleleBint int16
+	var alleleA, alleleB string
 	var seqBefore, seqAfter []dna.Base
 	var stringBefore, stringAfter string
 	var refBase []dna.Base
@@ -121,19 +122,22 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		}
 
 		if altNeedsRevComp {
-			m.AlleleA = revComp(m.AlleleA)
-			m.AlleleB = revComp(m.AlleleB)
+			alleleA = revComp(m.AlleleA)
+			alleleB = revComp(m.AlleleB)
+		} else {
+			alleleA = m.AlleleA
+			alleleB = m.AlleleB
 		}
 
 		switch curr.Ref {
-		case m.AlleleA:
+		case alleleA:
 			alleleAint = 0
 			alleleBint = 1
-			curr.Alt = []string{m.AlleleB}
-		case m.AlleleB:
+			curr.Alt = []string{alleleB}
+		case alleleB:
 			alleleAint = 1
 			alleleBint = 0
-			curr.Alt = []string{m.AlleleA}
+			curr.Alt = []string{alleleA}
 		default:
 			log.Panicf("ERROR: alternate alleles did not match reference\n%v\n", m)
 		}
