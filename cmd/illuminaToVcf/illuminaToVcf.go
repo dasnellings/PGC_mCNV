@@ -74,6 +74,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		curr.Pos = m.Pos
 		curr.Id = m.Name
 		refBase, err = fasta.SeekByName(ref, m.Chr, m.Pos, m.Pos+1)
+		fmt.Println(dna.BasesToString(refBase))
 		exception.PanicOnErr(err)
 		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
 
