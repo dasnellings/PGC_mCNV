@@ -92,8 +92,8 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		// check one of the alleles matches ref
 		altNeedsRevComp = false
 		switch {
-		case levenshtein(stringBefore, m.SeqBefore) <= 5 &&
-			levenshtein(stringAfter, m.SeqAfter) <= 5:
+		case levenshtein(stringBefore, m.SeqBefore) <= 5 ||
+			levenshtein(stringAfter, m.SeqAfter) <= 5: // this is a really weak match, but you would not believe the things I have seen...
 			fmt.Println("this is true")
 			if !m.TopStrand {
 				fmt.Println("we must rev comp")
@@ -120,7 +120,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			log.Println(revComp(stringAfter)[len(stringAfter)-5:])
 			log.Println(m.SeqBefore[len(m.SeqBefore)-5:])
 			log.Println()
-			log.Printf("ERROR: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
+			log.Printf("WARNING: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
 		}
 
 		if altNeedsRevComp {
