@@ -97,7 +97,8 @@ func processManifestLine(s string) Manifest {
 		case 'T', 'A':
 			totalCount++
 		default:
-			log.Panicf("ERROR: Unknown base in '%s'. Check following line\n%s\n", seqContext, s)
+			totalCount++
+			//log.Panicf("ERROR: Unknown base in '%s'. Check following line\n%s\n", seqContext, s) // they throw Y's and shit in there
 		}
 	}
 	ans.GC = float64(gcCount) / float64(totalCount)
