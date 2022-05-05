@@ -86,7 +86,7 @@ func processManifestLine(s string) Manifest {
 	ans.Pos, err = strconv.Atoi(fields[10])
 	exception.PanicOnErr(err)
 	var seqContext string
-	seqContext = fields[17][0:strings.Index(fields[17], "[")] + fields[17][strings.Index(fields[17], "]"):]
+	seqContext = fields[17][0:strings.Index(fields[17], "[")] + fields[17][strings.Index(fields[17], "]")-1:]
 	seqContext = strings.ToUpper(seqContext)
 	var gcCount int
 	var totalCount int
