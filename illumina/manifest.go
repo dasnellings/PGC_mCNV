@@ -1,6 +1,7 @@
 package illumina
 
 import (
+	"fmt"
 	"github.com/vertgenlab/gonomics/exception"
 	"github.com/vertgenlab/gonomics/fileio"
 	"log"
@@ -36,6 +37,7 @@ func readManifestToChan(filename string, ans chan<- Manifest) {
 	file := fileio.EasyOpen(filename)
 	var throughHeader bool
 	for line, done := fileio.EasyNextRealLine(file); !done; line, done = fileio.EasyNextRealLine(file) {
+		fmt.Println(line)
 		if throughHeader {
 			ans <- processManifestLine(line)
 		}
