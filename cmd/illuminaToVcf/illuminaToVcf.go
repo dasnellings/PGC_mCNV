@@ -98,8 +98,8 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			}
 
 			// only do partial check on rev comps since if snp is not directly in middle of probe then before/after lengths differ
-		case levenshtein(revComp(stringBefore)[:len(stringBefore)-5], m.SeqAfter[:5]) <= 2 &&
-			levenshtein(revComp(stringAfter)[len(stringAfter)-5:], m.SeqBefore[len(m.SeqBefore)-5:]) <= 2:
+		case levenshtein(revComp(stringBefore)[:5], m.SeqAfter[:5]) <= 1 &&
+			levenshtein(revComp(stringAfter)[len(stringAfter)-5:], m.SeqBefore[len(m.SeqBefore)-5:]) <= 1:
 			if m.TopStrand {
 				altNeedsRevComp = true
 			}
