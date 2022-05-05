@@ -53,12 +53,13 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	header.Text = strings.Split(headerInfo, "\n")
 	header.Text[len(header.Text)-1] += "\t" + strings.Join(gsReportFiles, "\t")
 	vcf.NewWriteHeader(out, header)
+	fmt.Println("here")
 
 	gsReportChans := make([]<-chan illumina.GsReport, len(gsReportFiles))
 	for i := range gsReportFiles {
 		gsReportChans[i] = illumina.GoReadGsReportToChan(gsReportFiles[i])
 	}
-
+	fmt.Println("here too")
 	manifestData := illumina.GoReadManifestToChan(manifestFile)
 
 	var err error
@@ -70,8 +71,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	var alleleAint, alleleBint int16
 	var refBase []dna.Base
 
+	fmt.Println("here as well")
 	for m := range manifestData {
-		fmt.Println(m)
+		fmt.Println("but not here")
 		curr.Chr = m.Chr
 		curr.Pos = m.Pos
 		curr.Id = m.Name
