@@ -78,11 +78,12 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		exception.PanicOnErr(err)
 		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
 
-		seqBefore, err = fasta.SeekByName(ref, m.Chr, m.Pos-len(m.SeqBefore), m.Pos-1)
+		seqBefore, err = fasta.SeekByName(ref, m.Chr, (m.Pos-1)-len(m.SeqBefore), m.Pos-1)
 		exception.PanicOnErr(err)
-		seqAfter, err = fasta.SeekByName(ref, m.Chr, m.Pos, (m.Pos-1)+len(m.SeqAfter))
+		seqAfter, err = fasta.SeekByName(ref, m.Chr, m.Pos, m.Pos+len(m.SeqAfter))
 		exception.PanicOnErr(err)
 
+		fmt.Println(m.TopStrand)
 		fmt.Println(dna.BasesToString(seqBefore))
 		fmt.Println(m.SeqBefore)
 		fmt.Println(dna.BasesToString(seqAfter))
