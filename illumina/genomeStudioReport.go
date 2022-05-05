@@ -31,6 +31,7 @@ func GoReadGsReportToChan(filename string) <-chan GsReport {
 func readReportToChan(filename string, ans chan<- GsReport) {
 	file := fileio.EasyOpen(filename)
 	for line, done := fileio.EasyNextRealLine(file); !done; line, done = fileio.EasyNextRealLine(file) {
+		line = strings.TrimRight(line, "\t") // remove trailing tab
 		if strings.HasPrefix(line, "SNP Name") {
 			if line != expectedGsReportHeader {
 				log.Fatalf("ERROR: unexpected report header. check file.\n%v\n%v", []byte(line), []byte(expectedGsReportHeader))
