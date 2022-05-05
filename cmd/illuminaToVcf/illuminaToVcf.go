@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/dasnellings/PGC_mCNV/illumina"
+	"github.com/vertgenlab/gonomics/dna"
 	"github.com/vertgenlab/gonomics/exception"
 	"github.com/vertgenlab/gonomics/fasta"
 	"github.com/vertgenlab/gonomics/fileio"
@@ -47,7 +48,7 @@ func main() {
 
 func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output string) {
 	out := fileio.EasyCreate(output)
-	ref := fasta.ReadToString(fastaFile)
+	ref := fasta.NewSeeker(fastaFile, fastaFile+".fai")
 	var header vcf.Header
 	header.Text = strings.Split(headerInfo, "\n")
 	header.Text[len(header.Text)-1] += "\t" + strings.Join(gsReportFiles, "\t")
@@ -60,17 +61,23 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 	manifestData := illumina.GoReadManifestToChan(manifestFile)
 
+	var err error
 	var curr vcf.Vcf
 	var gs illumina.GsReport
 	curr.Filter = "."
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
 	var alleleAint, alleleBint int16
+	var refBase []dna.Base
+
 	for m := range manifestData {
+		fmt.Println(m)
 		curr.Chr = m.Chr
 		curr.Pos = m.Pos
 		curr.Id = m.Name
-		curr.Ref = strings.ToUpper(string(ref[m.Chr][m.Pos]))
+		refBase, err = fasta.SeekByName(ref, m.Chr, m.Pos, m.Pos+1)
+		exception.PanicOnErr(err)
+		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
 
 		// check one of the alleles matches ref
 		switch curr.Ref {
@@ -112,7 +119,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		vcf.WriteVcf(out, curr)
 	}
 
-	err := out.Close()
+	err = out.Close()
+	exception.PanicOnErr(err)
+	err = ref.Close()
 	exception.PanicOnErr(err)
 }
 
