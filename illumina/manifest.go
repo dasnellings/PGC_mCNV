@@ -36,6 +36,9 @@ func readManifestToChan(filename string, ans chan<- Manifest) {
 	file := fileio.EasyOpen(filename)
 	var throughHeader bool
 	for line, done := fileio.EasyNextRealLine(file); !done; line, done = fileio.EasyNextRealLine(file) {
+		if line == "[Controls]" {
+			break
+		}
 		if throughHeader {
 			ans <- processManifestLine(line)
 			continue
