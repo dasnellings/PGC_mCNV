@@ -39,24 +39,6 @@ func main() {
 	output := flag.String("o", "stdout", "Output VCF file")
 	flag.Parse()
 
-	//f := fasta.ReadToString(*fastaFilename)
-	//o := fileio.EasyCreate("hg18_fixed.fa")
-	//var seq []byte
-	//for key, val := range f {
-	//	seq = []byte(val)
-	//	for i := range seq {
-	//		switch seq[i] {
-	//		case 'A', 'C', 'G', 'T', 'a', 'c', 'g', 't', 'N', 'n':
-	//			continue
-	//		default:
-	//			seq[i] = 'N'
-	//		}
-	//	}
-	//	fasta.WriteFasta(o, fasta.Fasta{key, dna.ByteSliceToDnaBases(seq)}, 50)
-	//}
-	//o.Close()
-	//return
-
 	if *gsReportFilename == "" || *manifestFilename == "" || *fastaFilename == "" {
 		usage()
 		log.Fatal("ERROR: GenomeStudio report, manifest, and reference fasta files are required (-gsReport, -manifest, -ref)")
@@ -103,7 +85,6 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		exception.PanicOnErr(err)
 		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
 
-		fmt.Println("chr"+strings.TrimLeft(m.Chr, "chr"), (m.Pos-1)-len(m.SeqBefore), m.Pos-1)
 		seqBefore, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), (m.Pos-1)-len(m.SeqBefore), m.Pos-1)
 		exception.PanicOnErr(err)
 		stringBefore = strings.ToUpper(dna.BasesToString(seqBefore))
