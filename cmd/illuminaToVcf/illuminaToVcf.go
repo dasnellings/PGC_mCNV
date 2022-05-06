@@ -76,7 +76,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 	for m := range manifestData {
 		if m.Chr == "XY" { // SERIOUSLY ILLUMINA... SERIOUSLY
-			m.Chr = "Y"
+			m.Chr = "X"
 		}
 		curr.Chr = "chr" + strings.TrimLeft(m.Chr, "chr")
 		curr.Pos = m.Pos
@@ -161,7 +161,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		for i := range curr.Samples {
 			gs = <-gsReportChans[i]
 			if gs.Chrom == "xy" { // pacbio 4 life. fu illumina
-				gs.Chrom = "y"
+				gs.Chrom = "x"
 			}
 			if !matchesManifest(gs, m) {
 				log.Panicf("ERROR: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
