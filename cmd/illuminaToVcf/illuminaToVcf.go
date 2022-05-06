@@ -147,14 +147,14 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		sb.Reset()
 		for i := range curr.Samples {
 			gs = <-gsReportChans[i]
-			if gs.Chrom == "xy" { // pacbio 4 life. fu illumina
+			if gs.Chrom == "xy" {
 				gs.Chrom = "x"
 			}
 			if !matchesManifest(gs, m) {
 				log.Panicf("ERROR: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
 			}
 			curr.Samples[i].Phase = make([]bool, 1) // leave as false for unphased
-			curr.Samples[i].FormatData = []string{fmt.Sprintf("%g", gs.BAlleleFreq), fmt.Sprintf("%g", gs.LogRRatio)}
+			curr.Samples[i].FormatData = []string{"", fmt.Sprintf("%g", gs.BAlleleFreq), fmt.Sprintf("%g", gs.LogRRatio)}
 			switch gs.Allele1 {
 			case m.AlleleA:
 				curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleAint)
