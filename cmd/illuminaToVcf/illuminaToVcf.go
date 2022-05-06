@@ -75,6 +75,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	var altNeedsRevComp bool
 
 	for m := range manifestData {
+		if m.Chr == "XY" { // SERIOUSLY ILLUMINA... SERIOUSLY
+			m.Chr = "Y"
+		}
 		curr.Chr = "chr" + strings.TrimLeft(m.Chr, "chr")
 		curr.Pos = m.Pos
 		curr.Id = m.Name
@@ -128,7 +131,6 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			alleleA = m.AlleleA
 			alleleB = m.AlleleB
 		}
-		fmt.Println(alleleA, alleleB)
 
 		switch curr.Ref {
 		case alleleA:
@@ -157,6 +159,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		sb.Reset()
 		for i := range curr.Samples {
 			gs = <-gsReportChans[i]
+			if gs.Chrom == "xy" { // pacbio 4 life. fu illumina
+				gs.Chrom = "y"
+			}
 			if !matchesManifest(gs, m) {
 				log.Panicf("ERROR: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
 			}
