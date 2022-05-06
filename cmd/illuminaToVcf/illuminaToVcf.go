@@ -153,7 +153,6 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			if !matchesManifest(gs, m) {
 				log.Panicf("ERROR: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
 			}
-			curr.Samples[i].Phase = make([]bool, 1) // leave as false for unphased
 			curr.Samples[i].FormatData = []string{"", fmt.Sprintf("%g", gs.BAlleleFreq), fmt.Sprintf("%g", gs.LogRRatio)}
 			switch gs.Allele1 {
 			case m.AlleleA:
@@ -167,6 +166,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			case m.AlleleB:
 				curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleBint)
 			}
+			curr.Samples[i].Phase = make([]bool, len(curr.Samples[i].Alleles)) // leave as false for unphased
 		}
 		vcf.WriteVcf(out, curr)
 	}
