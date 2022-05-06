@@ -40,7 +40,21 @@ func main() {
 	flag.Parse()
 
 	f := fasta.ReadToString(*fastaFilename)
-	fmt.Println(f["chr3"][60805524:60805584])
+	o := fileio.EasyCreate("hg18_fixed.fa")
+	var seq []byte
+	for key, val := range f {
+		seq = []byte(val)
+		for i := range seq {
+			switch seq[i] {
+			case 'A', 'C', 'G', 'T', 'a', 'c', 'g', 't', 'N', 'n':
+				continue
+			default:
+				seq[i] = 'N'
+			}
+		}
+		fasta.WriteFasta(o, fasta.Fasta{key, dna.ByteSliceToDnaBases(seq)}, 50)
+	}
+	o.Close()
 	return
 
 	if *gsReportFilename == "" || *manifestFilename == "" || *fastaFilename == "" {
