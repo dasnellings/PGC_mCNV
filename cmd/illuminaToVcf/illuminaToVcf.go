@@ -39,23 +39,23 @@ func main() {
 	output := flag.String("o", "stdout", "Output VCF file")
 	flag.Parse()
 
-	f := fasta.ReadToString(*fastaFilename)
-	o := fileio.EasyCreate("hg18_fixed.fa")
-	var seq []byte
-	for key, val := range f {
-		seq = []byte(val)
-		for i := range seq {
-			switch seq[i] {
-			case 'A', 'C', 'G', 'T', 'a', 'c', 'g', 't', 'N', 'n':
-				continue
-			default:
-				seq[i] = 'N'
-			}
-		}
-		fasta.WriteFasta(o, fasta.Fasta{key, dna.ByteSliceToDnaBases(seq)}, 50)
-	}
-	o.Close()
-	return
+	//f := fasta.ReadToString(*fastaFilename)
+	//o := fileio.EasyCreate("hg18_fixed.fa")
+	//var seq []byte
+	//for key, val := range f {
+	//	seq = []byte(val)
+	//	for i := range seq {
+	//		switch seq[i] {
+	//		case 'A', 'C', 'G', 'T', 'a', 'c', 'g', 't', 'N', 'n':
+	//			continue
+	//		default:
+	//			seq[i] = 'N'
+	//		}
+	//	}
+	//	fasta.WriteFasta(o, fasta.Fasta{key, dna.ByteSliceToDnaBases(seq)}, 50)
+	//}
+	//o.Close()
+	//return
 
 	if *gsReportFilename == "" || *manifestFilename == "" || *fastaFilename == "" {
 		usage()
