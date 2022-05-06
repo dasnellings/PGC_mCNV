@@ -39,6 +39,10 @@ func main() {
 	output := flag.String("o", "stdout", "Output VCF file")
 	flag.Parse()
 
+	f := fasta.ReadToString(*fastaFilename)
+	fmt.Println(f["chr3"][60805524:60805584])
+	return
+
 	if *gsReportFilename == "" || *manifestFilename == "" || *fastaFilename == "" {
 		usage()
 		log.Fatal("ERROR: GenomeStudio report, manifest, and reference fasta files are required (-gsReport, -manifest, -ref)")
