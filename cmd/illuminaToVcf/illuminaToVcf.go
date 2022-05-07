@@ -155,6 +155,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			}
 			fmt.Println()
 			fmt.Println(m.Name)
+			fmt.Println(curr.Ref, curr.Alt)
 			fmt.Println("manifest:", m.AlleleA, m.AlleleB, m.TopStrand)
 			fmt.Println("report  :", gs.Allele1, gs.Allele2)
 			curr.Samples[i].FormatData = []string{"", fmt.Sprintf("%g", gs.BAlleleFreq), fmt.Sprintf("%g", gs.LogRRatio)}
