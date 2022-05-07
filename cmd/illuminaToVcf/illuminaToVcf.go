@@ -68,7 +68,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
 	var alleleAint, alleleBint int16
-	var alleleA, alleleB, gsAllele1, gsAllele2 string
+	var alleleA, alleleB string //, gsAllele1, gsAllele2 string
 	var seqBefore, seqAfter []dna.Base
 	var stringBefore, stringAfter string
 	var refBase []dna.Base
