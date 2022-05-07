@@ -161,7 +161,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				gsAllele2 = revComp(gsAllele2)
 			}
 
-			curr.Samples[i].FormatData = []string{"", fmt.Sprintf("%g", gs.BAlleleFreq), fmt.Sprintf("%g", gs.LogRRatio)}
+			curr.Samples[i].FormatData = []string{"", fmt.Sprintf("%.4g", gs.BAlleleFreq), fmt.Sprintf("%.4g", gs.LogRRatio)}
 			switch gsAllele1 {
 			case m.AlleleA:
 				curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleAint)
