@@ -141,7 +141,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			}
 		}
 
-		curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%g", alleleAint, alleleBint, m.GC)
+		curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%.4g", alleleAint, alleleBint, m.GC)
 		curr.Samples = make([]vcf.Sample, len(gsReportChans))
 
 		sb.Reset()
