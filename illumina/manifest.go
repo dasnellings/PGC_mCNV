@@ -13,17 +13,18 @@ const expectedManifestHeader string = "IlmnID,Name,IlmnStrand,SNP,AddressA_ID,Al
 	"TopGenomicSeq,BeadSetId"
 
 type Manifest struct {
-	IlmnId      string
-	Name        string
-	TopStrand   bool
-	AlleleA     string
-	AlleleB     string
-	SeqBefore   string
-	SeqAfter    string
-	GenomeBuild string
-	Chr         string
-	Pos         int
-	GC          float64
+	IlmnId       string
+	Name         string
+	TopStrand    bool
+	SrcTopStrand bool
+	AlleleA      string
+	AlleleB      string
+	SeqBefore    string
+	SeqAfter     string
+	GenomeBuild  string
+	Chr          string
+	Pos          int
+	GC           float64
 }
 
 func GoReadManifestToChan(filename string) <-chan Manifest {
@@ -70,6 +71,14 @@ func processManifestLine(s string) Manifest {
 		ans.TopStrand = true
 	case "Bot", "BOT":
 		ans.TopStrand = false
+	default:
+		log.Panicf("Unrecognized strand '%s' in below line\n%s\n", fields[2], s)
+	}
+	switch fields[15] {
+	case "Top", "TOP":
+		ans.SrcTopStrand = true
+	case "Bot", "BOT":
+		ans.SrcTopStrand = false
 	default:
 		log.Panicf("Unrecognized strand '%s' in below line\n%s\n", fields[2], s)
 	}
