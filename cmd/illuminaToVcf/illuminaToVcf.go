@@ -68,7 +68,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
 	var alleleAint, alleleBint int16
-	var alleleA, alleleB string
+	var alleleA, alleleB, gsAllele1, gsAllele2 string
 	var seqBefore, seqAfter []dna.Base
 	var stringBefore, stringAfter string
 	var refBase []dna.Base
@@ -153,6 +153,8 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			if !matchesManifest(gs, m) {
 				log.Panicf("ERROR: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
 			}
+			fmt.Println("manifest:", m.AlleleA, m.AlleleB)
+			fmt.Println("report  :", gs.Allele1, gs.Allele2)
 			curr.Samples[i].FormatData = []string{"", fmt.Sprintf("%g", gs.BAlleleFreq), fmt.Sprintf("%g", gs.LogRRatio)}
 			switch gs.Allele1 {
 			case m.AlleleA:
