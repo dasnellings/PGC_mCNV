@@ -84,13 +84,8 @@ func processManifestLine(s string) Manifest {
 	}
 	var alleles []string
 	alleles = strings.Split(strings.TrimLeft(strings.TrimRight(fields[3], "]"), "["), "/")
-	if ans.TopStrand {
-		ans.AlleleA = alleles[0]
-		ans.AlleleB = alleles[1]
-	} else {
-		ans.AlleleA = alleles[1]
-		ans.AlleleB = alleles[0]
-	}
+	ans.AlleleA = alleles[0]
+	ans.AlleleB = alleles[1]
 	ans.GenomeBuild = fields[8]
 	ans.Chr = fields[9]
 	ans.Pos, err = strconv.Atoi(fields[10])
