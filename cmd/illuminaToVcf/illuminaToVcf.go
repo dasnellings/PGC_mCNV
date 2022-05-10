@@ -10,7 +10,9 @@ import (
 	"github.com/vertgenlab/gonomics/fileio"
 	"github.com/vertgenlab/gonomics/numbers"
 	"github.com/vertgenlab/gonomics/vcf"
+	"golang.org/x/exp/slices"
 	"log"
+	"path"
 	"strings"
 )
 
@@ -52,7 +54,12 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	ref := fasta.NewSeeker(fastaFile, fastaFile+".fai")
 	var header vcf.Header
 	header.Text = strings.Split(headerInfo, "\n")
-	header.Text[len(header.Text)-1] += "\t" + strings.Join(gsReportFiles, "\t")
+
+	trimSamples := slices.Clone(gsReportFiles)
+	for i := range trimSamples {
+		trimSamples[i] = strings.TrimRight(path.Base(trimSamples[i]), ".gz")
+	}
+	header.Text[len(header.Text)-1] += "\t" + strings.Join(trimSamples, "\t")
 	vcf.NewWriteHeader(out, header)
 
 	gsReportChans := make([]<-chan illumina.GsReport, len(gsReportFiles))
