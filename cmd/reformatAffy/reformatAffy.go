@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	affyFile := os.Args[0]
-	outFile := os.Args[1]
+	affyFile := os.Args[1]
+	outFile := os.Args[2]
 	if affyFile == "" {
 		log.Fatal("ERROR: arg 1 must be affy file")
 	}
