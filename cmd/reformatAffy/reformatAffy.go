@@ -24,10 +24,9 @@ func main() {
 
 	var v vcf.Vcf
 	var queryResult [][]string
-	var idx int
+	var i int
 	var err error
 	var found bool
-	var s vcf.Sample
 	for v = range data {
 		queryResult, found = vcf.QueryString(v, header.Info["DBSNP_RS_ID"].Key)
 		if !found {
@@ -40,9 +39,9 @@ func main() {
 			log.Panicln("bad format:", v.String())
 		}
 		v.Format = []string{"GT", "BAF", "LRR"}
-		for _, s := range v.Samples {
-			s.FormatData = s.FormatData[5:]
-			s.FormatData[0] = ""
+		for i = range v.Samples {
+			v.Samples[i].FormatData = v.Samples[i].FormatData[5:]
+			v.Samples[i].FormatData[0] = ""
 		}
 	}
 }
