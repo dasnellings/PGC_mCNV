@@ -27,9 +27,9 @@ const headerInfo string = "##fileformat=VCFv4.2\n" +
 
 func usage() {
 	fmt.Print(
-		"illuminaToVcf - Convert SNP array data from GenomeStudio report format to VCF format.\n" +
+		"reformatAffyVcf - Convert SNP array data from GenomeStudio report format to VCF format.\n" +
 			"Usage:\n" +
-			"./illuminaToVcf [options] -gsReport sample1,sample2 -manifest arrayManifest.csv -ref reference.fasta\n\n")
+			"./reformatAffyVcf [options] -gsReport sample1,sample2 -manifest arrayManifest.csv -ref reference.fasta\n\n")
 	flag.PrintDefaults()
 }
 
