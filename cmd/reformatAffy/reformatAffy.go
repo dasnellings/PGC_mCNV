@@ -31,7 +31,8 @@ func main() {
 		v = vcf.ParseInfo(v, header)
 		queryResult, found = vcf.QueryString(v, header.Info["DBSNP_RS_ID"].Key)
 		if !found {
-			log.Println("WARNING:", err)
+			log.Println("WARNING:", v)
+			v.Id = "."
 		} else {
 			v.Id = queryResult[0][0]
 		}
