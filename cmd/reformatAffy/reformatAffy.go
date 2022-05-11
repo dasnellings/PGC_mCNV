@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/vertgenlab/gonomics/exception"
 	"github.com/vertgenlab/gonomics/fileio"
 	"github.com/vertgenlab/gonomics/vcf"
 	"log"
@@ -44,5 +45,8 @@ func main() {
 			v.Samples[i].FormatData = v.Samples[i].FormatData[5:]
 			v.Samples[i].FormatData[0] = ""
 		}
+		vcf.WriteVcf(out, v)
 	}
+	err := out.Close()
+	exception.PanicOnErr(err)
 }
