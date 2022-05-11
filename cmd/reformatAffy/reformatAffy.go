@@ -25,7 +25,6 @@ func main() {
 	var v vcf.Vcf
 	var queryResult [][]string
 	var i int
-	var err error
 	var found bool
 	for v = range data {
 		v = vcf.ParseInfo(v, header)
