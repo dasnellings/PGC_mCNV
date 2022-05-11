@@ -28,7 +28,7 @@ func main() {
 	var err error
 	var found bool
 	for v = range data {
-		vcf.ParseInfo(v, header)
+		v = vcf.ParseInfo(v, header)
 		queryResult, found = vcf.QueryString(v, header.Info["DBSNP_RS_ID"].Key)
 		if !found {
 			log.Println("WARNING:", err)
