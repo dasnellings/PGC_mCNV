@@ -163,7 +163,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 			gsAllele1 = gs.Allele1
 			gsAllele2 = gs.Allele2
-			if m.TopStrand != m.SrcTopStrand {
+			if (gs.ReportedAsFwd && m.TopStrand != m.SrcTopStrand) || (!gs.ReportedAsFwd && !m.TopStrand) {
 				gsAllele1 = revComp(gsAllele1)
 				gsAllele2 = revComp(gsAllele2)
 			}
