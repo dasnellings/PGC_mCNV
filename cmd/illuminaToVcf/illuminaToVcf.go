@@ -70,7 +70,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 	var err error
 	var curr vcf.Vcf
-	var gs *illumina.GsReport
+	var gs = new(illumina.GsReport)
 	curr.Filter = "."
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
