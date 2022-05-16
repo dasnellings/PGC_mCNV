@@ -155,7 +155,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 		sb.Reset()
 		for i := range curr.Samples {
-			if gs.Chrom == "done" {
+			if gs.Chrom == "" {
 				gs = <-gsReportChans[i]
 				if gs.Chrom == "xy" {
 					gs.Chrom = "x"
@@ -194,7 +194,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleBint)
 			}
 			curr.Samples[i].Phase = make([]bool, len(curr.Samples[i].Alleles)) // leave as false for unphased
-			gs.Chrom = "done"
+			gs.Chrom = ""
 		}
 		vcf.WriteVcf(out, curr)
 	}
