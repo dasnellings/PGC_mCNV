@@ -80,6 +80,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	var stringBefore, stringAfter string
 	var refBase []dna.Base
 	var altNeedsRevComp bool
+	var samplesWritten int
 
 	for m := range manifestData {
 		if m.Chr == "XY" || m.Chr == "chrXY" { // SERIOUSLY ILLUMINA... SERIOUSLY
@@ -153,8 +154,8 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 		curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%.4g", alleleAint, alleleBint, m.GC)
 		curr.Samples = make([]vcf.Sample, len(gsReportChans))
-
 		sb.Reset()
+		samplesWritten = 0
 		for i := range curr.Samples {
 			if gs.Chrom == "" {
 				gs = <-gsReportChans[i]
@@ -172,7 +173,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				log.Println("moving to next manifest record")
 				break
 			}
-
+			samplesWritten++
 			gsAllele1 = gs.Allele1
 			gsAllele2 = gs.Allele2
 			if (gs.ReportedAsFwd && m.TopStrand != m.SrcTopStrand) || (!gs.ReportedAsFwd && !m.TopStrand) {
@@ -196,7 +197,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			curr.Samples[i].Phase = make([]bool, len(curr.Samples[i].Alleles)) // leave as false for unphased
 			gs.Chrom = ""
 		}
-		vcf.WriteVcf(out, curr)
+		if samplesWritten > 0 && curr.Chr != "chrM" { // exclude chrM
+			vcf.WriteVcf(out, curr)
+		}
 	}
 
 	err = out.Close()
