@@ -70,7 +70,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 	var err error
 	var curr vcf.Vcf
-	var gs illumina.GsReport
+	var gs *illumina.GsReport
 	curr.Filter = "."
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
@@ -155,12 +155,20 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 		sb.Reset()
 		for i := range curr.Samples {
-			gs = <-gsReportChans[i]
-			if gs.Chrom == "xy" {
-				gs.Chrom = "x"
+			if gs.Chrom == "done" {
+				*gs = <-gsReportChans[i]
+				if gs.Chrom == "xy" {
+					gs.Chrom = "x"
+				}
 			}
+
 			if !matchesManifest(gs, m) {
-				log.Panicf("ERROR: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
+				if i != 0 {
+					log.Panicf("something went horibly wrong with sample %s\n%v", gsReportFiles[i], gs)
+				}
+				log.Printf("WARNING: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
+				log.Println("moving to next manifest record")
+				break
 			}
 
 			gsAllele1 = gs.Allele1
@@ -186,6 +194,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			curr.Samples[i].Phase = make([]bool, len(curr.Samples[i].Alleles)) // leave as false for unphased
 		}
 		vcf.WriteVcf(out, curr)
+		gs.Chrom = "done"
 	}
 
 	err = out.Close()
@@ -194,7 +203,21 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	exception.PanicOnErr(err)
 }
 
-func matchesManifest(gs illumina.GsReport, m illumina.Manifest) bool {
+func makeManifestMap(manifests []string) map[string]illumina.Manifest {
+	var found bool
+	m := make(map[string]illumina.Manifest)
+	for i := range manifests {
+		c := illumina.GoReadManifestToChan(manifests[i])
+		for v := range c {
+			if _, found = m[strings.ToLower(v.Name)]; !found {
+				m[strings.ToLower(v.Name)] = v
+			}
+		}
+	}
+	return m
+}
+
+func matchesManifest(gs *illumina.GsReport, m illumina.Manifest) bool {
 	if strings.ToUpper(gs.Marker) != strings.ToUpper(m.Name) {
 		return false
 	}
