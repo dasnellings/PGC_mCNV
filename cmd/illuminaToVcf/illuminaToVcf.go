@@ -82,7 +82,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	var altNeedsRevComp bool
 
 	for m := range manifestData {
-		if m.Chr == "XY" { // SERIOUSLY ILLUMINA... SERIOUSLY
+		if m.Chr == "XY" || m.Chr == "chrXY" { // SERIOUSLY ILLUMINA... SERIOUSLY
 			m.Chr = "X"
 		}
 		curr.Chr = "chr" + strings.TrimLeft(m.Chr, "chr")
