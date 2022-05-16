@@ -70,7 +70,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 	var err error
 	var curr vcf.Vcf
-	var gs = new(illumina.GsReport)
+	var gs illumina.GsReport
 	curr.Filter = "."
 	curr.Format = []string{"GT", "BAF", "LRR"}
 	sb := new(strings.Builder)
@@ -156,7 +156,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		sb.Reset()
 		for i := range curr.Samples {
 			if gs.Chrom == "done" {
-				*gs = <-gsReportChans[i]
+				gs = <-gsReportChans[i]
 				if gs.Chrom == "xy" {
 					gs.Chrom = "x"
 				}
@@ -219,7 +219,7 @@ func makeManifestMap(manifests []string) map[string]illumina.Manifest {
 	return m
 }
 
-func matchesManifest(gs *illumina.GsReport, m illumina.Manifest) bool {
+func matchesManifest(gs illumina.GsReport, m illumina.Manifest) bool {
 	if strings.ToUpper(gs.Marker) != strings.ToUpper(m.Name) {
 		return false
 	}
