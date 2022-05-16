@@ -171,6 +171,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				log.Println("moving to next manifest record")
 				break
 			}
+			fmt.Println("PROCEEDING WITH ", gs, m)
 
 			gsAllele1 = gs.Allele1
 			gsAllele2 = gs.Allele2
