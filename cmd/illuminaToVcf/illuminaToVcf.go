@@ -162,6 +162,9 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				if gs.Chrom == "xy" {
 					gs.Chrom = "x"
 				}
+				if gs.Chrom == "XY" {
+					gs.Chrom = "X"
+				}
 			}
 
 			if !matchesManifest(gs, m) {
