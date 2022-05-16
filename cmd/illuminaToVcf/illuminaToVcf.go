@@ -119,6 +119,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 
 		default:
 			log.Printf("WARNING: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
+			log.Println(m.Name, m.Chr, m.Pos)
 		}
 
 		if altNeedsRevComp {
