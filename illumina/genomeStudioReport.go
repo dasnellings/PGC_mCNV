@@ -33,6 +33,7 @@ func GoReadGsReportToChan(filename string) <-chan GsReport {
 
 func readReportToChan(filename string, ans chan<- GsReport) {
 	file := fileio.EasyOpen(filename)
+	var gs GsReport
 	var processFunc func(string) GsReport
 	for line, done := fileio.EasyNextRealLine(file); !done; line, done = fileio.EasyNextRealLine(file) {
 		line = strings.TrimRight(line, "\t") // remove trailing tab
@@ -49,7 +50,11 @@ func readReportToChan(filename string, ans chan<- GsReport) {
 			}
 			continue
 		}
-		ans <- processFunc(line)
+		gs = processFunc(line)
+		if strings.ToLower(gs.Chrom) == "mt" {
+			gs.Chrom = "M"
+		}
+		ans <- gs
 	}
 	err := file.Close()
 	exception.PanicOnErr(err)
