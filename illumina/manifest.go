@@ -11,6 +11,9 @@ import (
 const expectedManifestHeader string = "IlmnID,Name,IlmnStrand,SNP,AddressA_ID,AlleleA_ProbeSeq,AddressB_ID," +
 	"AlleleB_ProbeSeq,GenomeBuild,Chr,MapInfo,Ploidy,Species,Source,SourceVersion,SourceStrand,SourceSeq," +
 	"TopGenomicSeq,BeadSetId"
+const expectedManifestHeader2 string = "IlmnID,Name,IlmnStrand,SNP,AddressA_ID,AlleleA_ProbeSeq,AddressB_ID," +
+	"AlleleB_ProbeSeq,GenomeBuild,Chr,MapInfo,Ploidy,Species,Source,SourceVersion,SourceStrand,SourceSeq," +
+	"TopGenomicSeq,BeadSetID,Exp_Clusters,Intensity_Only,RefStrand"
 
 type Manifest struct {
 	IlmnId       string
@@ -47,7 +50,7 @@ func readManifestToChan(filename string, ans chan<- Manifest) {
 		if !strings.HasPrefix(line, "IlmnID") {
 			continue
 		}
-		if line != expectedManifestHeader {
+		if line != expectedManifestHeader && line != expectedManifestHeader2 {
 			log.Fatalf("ERROR: unexpected manifest header. check file.\n%s\n%s", line, expectedManifestHeader)
 		}
 		throughHeader = true
@@ -61,7 +64,7 @@ func processManifestLine(s string) Manifest {
 	var ans Manifest
 	var err error
 	fields := strings.Split(s, ",")
-	if len(fields) != 19 {
+	if len(fields) != len(strings.Split(expectedManifestHeader, ",")) || len(fields) != len(strings.Split(expectedManifestHeader2, ",")) {
 		log.Panicf("ERROR: following lines has unexpected number of columns:\n%s", s)
 	}
 	ans.IlmnId = fields[0]
