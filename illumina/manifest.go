@@ -95,6 +95,9 @@ func processManifestLine(s string) Manifest {
 	ans.AlleleB = alleles[1]
 	ans.GenomeBuild = fields[8]
 	ans.Chr = fields[9]
+	if ans.Chr == "MT" {
+		ans.Chr = "M"
+	}
 	ans.Pos, err = strconv.Atoi(fields[10])
 	exception.PanicOnErr(err)
 	if ans.Chr == "0" && ans.Pos == 0 {
