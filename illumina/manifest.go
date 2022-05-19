@@ -38,13 +38,17 @@ func GoReadManifestToChan(filename string) <-chan Manifest {
 
 func readManifestToChan(filename string, ans chan<- Manifest) {
 	file := fileio.EasyOpen(filename)
+	var m Manifest
 	var throughHeader bool
 	for line, done := fileio.EasyNextRealLine(file); !done; line, done = fileio.EasyNextRealLine(file) {
 		if strings.HasPrefix(line, "[Controls]") {
 			break
 		}
 		if throughHeader {
-			ans <- processManifestLine(line)
+			m = processManifestLine(line)
+			if m.Chr != "" {
+				ans <- m
+			}
 			continue
 		}
 		if !strings.HasPrefix(line, "IlmnID") {
@@ -93,6 +97,9 @@ func processManifestLine(s string) Manifest {
 	ans.Chr = fields[9]
 	ans.Pos, err = strconv.Atoi(fields[10])
 	exception.PanicOnErr(err)
+	if ans.Chr == "0" && ans.Pos == 0 {
+		return Manifest{}
+	}
 	var seqContext string
 	ans.SeqBefore = strings.ToUpper(strings.Split(fields[17], "[")[0])
 	ans.SeqAfter = strings.ToUpper(strings.Split(fields[17], "]")[1])

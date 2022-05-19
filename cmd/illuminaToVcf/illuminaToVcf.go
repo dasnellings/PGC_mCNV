@@ -157,13 +157,24 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		sb.Reset()
 		samplesWritten = 0
 		for i := range curr.Samples {
-			if gs.Chrom == "" {
+			for gs.Chrom == "" {
 				gs = <-gsReportChans[i]
+				switch gs.Chrom {
+				case "xy":
+					gs.Chrom = "x"
+				case "XY":
+					gs.Chrom = "X"
+				case "MT":
+					gs.Chrom = "M"
+				}
 				if gs.Chrom == "xy" {
 					gs.Chrom = "x"
 				}
 				if gs.Chrom == "XY" {
 					gs.Chrom = "X"
+				}
+				if gs.Chrom == "MT" {
+					gs.Chrom = "M"
 				}
 			}
 
