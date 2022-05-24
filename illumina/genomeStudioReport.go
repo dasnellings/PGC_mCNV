@@ -11,6 +11,7 @@ import (
 const gsHeader1 string = "SNP Name\tChromosome\tPosition\tAl1Fwd\tAl2Fwd\tX\tY\tB Allele Freq\tLog R Ratio"
 const gsHeader2 string = "SNP Name\tChr\tPosition\tAllele1 - Forward\tAllele2 - Forward\tX Raw\tY Raw\tX\tY\tTheta\tB Allele Freq\tLog R Ratio\tR\tAllele1 - Top\tAllele2 - Top\tGC Score\tGT Score\tCluster Sep"
 const gsHeader3 string = "SNP Name\tChr\tPosition\tAllele1 - Top\tAllele2 - Top\tX\tY\tLog R Ratio\tB Allele Freq"
+const gsHeader4 string = "SNP Name\tChr\tPosition\tAl1Fwd\tAl2Fwd\tX\tY\tB Allele Freq\tLog R Ratio"
 
 type GsReport struct {
 	Marker  string
@@ -45,6 +46,8 @@ func readReportToChan(filename string, ans chan<- GsReport) {
 				processFunc = processGsHeader2
 			case gsHeader3:
 				processFunc = processGsHeader3
+			case gsHeader4:
+				processFunc = processGsHeader1
 			default:
 				log.Fatalf("ERROR: unexpected report header. check file.\n%v\n%v", line)
 			}
