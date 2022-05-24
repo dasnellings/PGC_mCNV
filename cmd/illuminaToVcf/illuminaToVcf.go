@@ -288,80 +288,82 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 		m, found = mm[strings.ToLower(gs.Marker)]
 		if !found {
 			m.Chr = "NOT_FOUND"
-		} else {
-
-			if m.Chr == "XY" || m.Chr == "chrXY" { // SERIOUSLY ILLUMINA... SERIOUSLY
-				m.Chr = "X"
+			for i := 1; i < len(gsReportChans); i++ {
+				<-gsReportChans[i] // burn
 			}
-			curr.Chr = "chr" + strings.TrimLeft(m.Chr, "chr")
-			curr.Pos = m.Pos
-			curr.Id = m.Name
-			refBase, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos-1, m.Pos)
-			exception.PanicOnErr(err)
-			curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
-
-			seqBefore, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), (m.Pos-1)-len(m.SeqBefore), m.Pos-1)
-			exception.PanicOnErr(err)
-			stringBefore = strings.ToUpper(dna.BasesToString(seqBefore))
-			seqAfter, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos, m.Pos+len(m.SeqAfter))
-			if err != nil {
-				fmt.Println("WARNING", err)
-			}
-			stringAfter = strings.ToUpper(dna.BasesToString(seqAfter))
-
-			// check one of the alleles matches ref
-			altNeedsRevComp = false
-			switch {
-			case levenshtein(stringBefore, m.SeqBefore) <= 5 ||
-				levenshtein(stringAfter, m.SeqAfter) <= 5: // this is a really weak match, but you would not believe the things I have seen...
-				if !m.TopStrand {
-					altNeedsRevComp = true
-				}
-
-				// only do partial check on rev comps since if snp is not directly in middle of probe then before/after lengths differ
-			case levenshtein(revComp(stringBefore)[:5], m.SeqAfter[:5]) <= 1 ||
-				levenshtein(revComp(stringAfter)[len(stringAfter)-5:], m.SeqBefore[len(m.SeqBefore)-5:]) <= 1:
-				if m.TopStrand {
-					altNeedsRevComp = true
-				}
-
-			default:
-				log.Printf("WARNING: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
-				log.Println(m.Name, m.Chr, m.Pos)
-			}
-
-			if altNeedsRevComp {
-				alleleA = revComp(m.AlleleA)
-				alleleB = revComp(m.AlleleB)
-			} else {
-				alleleA = m.AlleleA
-				alleleB = m.AlleleB
-			}
-
-			switch curr.Ref {
-			case alleleA:
-				alleleAint = 0
-				alleleBint = 1
-				curr.Alt = []string{alleleB}
-			case alleleB:
-				alleleAint = 1
-				alleleBint = 0
-				curr.Alt = []string{alleleA}
-			default:
-				if alleleA == alleleB {
-					alleleAint = 1
-					alleleBint = 1
-					curr.Alt = []string{alleleA}
-				} else {
-					alleleAint = 1
-					alleleBint = 2
-					curr.Alt = []string{alleleA, alleleB}
-				}
-			}
-
-			curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%.4g", alleleAint, alleleBint, m.GC)
-			curr.Samples = make([]vcf.Sample, len(gsReportChans))
+			continue
 		}
+		if m.Chr == "XY" || m.Chr == "chrXY" { // SERIOUSLY ILLUMINA... SERIOUSLY
+			m.Chr = "X"
+		}
+		curr.Chr = "chr" + strings.TrimLeft(m.Chr, "chr")
+		curr.Pos = m.Pos
+		curr.Id = m.Name
+		refBase, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos-1, m.Pos)
+		exception.PanicOnErr(err)
+		curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
+
+		seqBefore, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), (m.Pos-1)-len(m.SeqBefore), m.Pos-1)
+		exception.PanicOnErr(err)
+		stringBefore = strings.ToUpper(dna.BasesToString(seqBefore))
+		seqAfter, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos, m.Pos+len(m.SeqAfter))
+		if err != nil {
+			fmt.Println("WARNING", err)
+		}
+		stringAfter = strings.ToUpper(dna.BasesToString(seqAfter))
+
+		// check one of the alleles matches ref
+		altNeedsRevComp = false
+		switch {
+		case levenshtein(stringBefore, m.SeqBefore) <= 5 ||
+			levenshtein(stringAfter, m.SeqAfter) <= 5: // this is a really weak match, but you would not believe the things I have seen...
+			if !m.TopStrand {
+				altNeedsRevComp = true
+			}
+
+			// only do partial check on rev comps since if snp is not directly in middle of probe then before/after lengths differ
+		case levenshtein(revComp(stringBefore)[:5], m.SeqAfter[:5]) <= 1 ||
+			levenshtein(revComp(stringAfter)[len(stringAfter)-5:], m.SeqBefore[len(m.SeqBefore)-5:]) <= 1:
+			if m.TopStrand {
+				altNeedsRevComp = true
+			}
+
+		default:
+			log.Printf("WARNING: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
+			log.Println(m.Name, m.Chr, m.Pos)
+		}
+
+		if altNeedsRevComp {
+			alleleA = revComp(m.AlleleA)
+			alleleB = revComp(m.AlleleB)
+		} else {
+			alleleA = m.AlleleA
+			alleleB = m.AlleleB
+		}
+
+		switch curr.Ref {
+		case alleleA:
+			alleleAint = 0
+			alleleBint = 1
+			curr.Alt = []string{alleleB}
+		case alleleB:
+			alleleAint = 1
+			alleleBint = 0
+			curr.Alt = []string{alleleA}
+		default:
+			if alleleA == alleleB {
+				alleleAint = 1
+				alleleBint = 1
+				curr.Alt = []string{alleleA}
+			} else {
+				alleleAint = 1
+				alleleBint = 2
+				curr.Alt = []string{alleleA, alleleB}
+			}
+		}
+
+		curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%.4g", alleleAint, alleleBint, m.GC)
+		curr.Samples = make([]vcf.Sample, len(gsReportChans))
 
 		for i := 0; i < len(curr.Samples); i++ {
 			if i > 0 {
