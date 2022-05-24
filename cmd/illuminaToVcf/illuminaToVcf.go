@@ -387,7 +387,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 			if m.Chr == "NOT_FOUND" {
 				continue
 			}
-
+			fmt.Println(gs)
 			if strings.ToLower(m.Name) != strings.ToLower(gs.Marker) {
 				log.Print(m)
 				log.Print(gs)
