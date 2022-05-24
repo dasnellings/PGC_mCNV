@@ -409,9 +409,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 					log.Panicf("something went horibly wrong with sample %s\n%v", gsReportFiles[i], gs)
 				}
 				log.Printf("WARNING: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
-				log.Printf("waiting for %v", gs)
-				log.Println("moving to next manifest record")
-				break
 			}
 			samplesWritten++
 			gsAllele1 = gs.Allele1
