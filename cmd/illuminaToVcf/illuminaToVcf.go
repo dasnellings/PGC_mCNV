@@ -390,6 +390,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 					}
 				}
 			}
+			fmt.Println("AFTER PRIOR: ", i, gs)
 			if m.Chr == "NOT_FOUND" {
 				continue
 			}
