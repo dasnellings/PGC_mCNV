@@ -261,7 +261,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 	var m illumina.Manifest
 
 	for gs = range gsReportChans[0] {
-		fmt.Println("INITIAL: ", gs)
 		for gs.Chrom == "" || gs.Chrom == "0" {
 			for i := 1; i < len(gsReportChans); i++ {
 				<-gsReportChans[i] // burn
@@ -285,7 +284,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 		if gs.Chrom == "MT" {
 			gs.Chrom = "M"
 		}
-		fmt.Println("AFTER INITIAL: ", gs)
 
 		samplesWritten = 0
 		m, found = mm[strings.ToLower(gs.Marker)]
@@ -371,7 +369,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 		for i := 0; i < len(curr.Samples); i++ {
 			if i > 0 {
 				gs = <-gsReportChans[i]
-				fmt.Println("PRIOR: ", i, gs)
 				for gs.Chrom == "" || gs.Chrom == "0" {
 					gs = <-gsReportChans[0]
 				}
@@ -393,11 +390,9 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 					gs.Chrom = "M"
 				}
 			}
-			fmt.Println("AFTER PRIOR: ", i, gs)
 			if m.Chr == "NOT_FOUND" {
 				continue
 			}
-			fmt.Println(gs)
 			if strings.ToLower(m.Name) != strings.ToLower(gs.Marker) {
 				log.Print(m)
 				log.Print(gs)
