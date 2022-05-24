@@ -15,6 +15,10 @@ const expectedManifestHeader2 string = "IlmnID,Name,IlmnStrand,SNP,AddressA_ID,A
 	"AlleleB_ProbeSeq,GenomeBuild,Chr,MapInfo,Ploidy,Species,Source,SourceVersion,SourceStrand,SourceSeq," +
 	"TopGenomicSeq,BeadSetID,Exp_Clusters,Intensity_Only,RefStrand"
 
+const expectedManifestHeader3 string = "IlmnID,Name,IlmnStrand,SNP,AddressA_ID,AlleleA_ProbeSeq,AddressB_ID," +
+	"AlleleB_ProbeSeq,GenomeBuild,Chr,MapInfo,Ploidy,Species,Source,SourceVersion,SourceStrand,SourceSeq," +
+	"TopGenomicSeq,BeadSetID,Exp_Clusters,RefStrand"
+
 type Manifest struct {
 	IlmnId       string
 	Name         string
@@ -54,7 +58,7 @@ func readManifestToChan(filename string, ans chan<- Manifest) {
 		if !strings.HasPrefix(line, "IlmnID") {
 			continue
 		}
-		if line != expectedManifestHeader && line != expectedManifestHeader2 {
+		if line != expectedManifestHeader && line != expectedManifestHeader2 && line != expectedManifestHeader3 {
 			log.Fatalf("ERROR: unexpected manifest header. check file.\n%s\n%s", line, expectedManifestHeader)
 		}
 		throughHeader = true
