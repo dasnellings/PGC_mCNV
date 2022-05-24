@@ -72,7 +72,9 @@ func processManifestLine(s string) Manifest {
 	var ans Manifest
 	var err error
 	fields := strings.Split(s, ",")
-	if len(fields) != len(strings.Split(expectedManifestHeader, ",")) && len(fields) != len(strings.Split(expectedManifestHeader2, ",")) {
+	if len(fields) != len(strings.Split(expectedManifestHeader, ",")) &&
+		len(fields) != len(strings.Split(expectedManifestHeader2, ",")) &&
+		len(fields) != len(strings.Split(expectedManifestHeader3, ",")) {
 		log.Panicf("ERROR: following lines has unexpected number of columns:\n%s", s)
 	}
 	ans.IlmnId = fields[0]
