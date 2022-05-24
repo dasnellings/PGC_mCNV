@@ -282,6 +282,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 				gs.Chrom = "M"
 			}
 		}
+		fmt.Println("AFTER INITIAL: ", gs)
 
 		samplesWritten = 0
 		m, found = mm[strings.ToLower(gs.Marker)]
