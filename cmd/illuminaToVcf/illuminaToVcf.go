@@ -263,6 +263,9 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 	for gs = range gsReportChans[0] {
 		fmt.Println("INITIAL: ", gs)
 		for gs.Chrom == "" || gs.Chrom == "0" {
+			for i := 1; i < len(gsReportChans); i++ {
+				<-gsReportChans[i] // burn
+			}
 			gs = <-gsReportChans[0]
 			switch gs.Chrom {
 			case "xy":
