@@ -405,9 +405,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 			}
 
 			if !matchesManifest(gs, m) {
-				if i != 0 {
-					log.Panicf("something went horibly wrong with sample %s\n%v", gsReportFiles[i], gs)
-				}
 				log.Printf("WARNING: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
 			}
 			samplesWritten++
