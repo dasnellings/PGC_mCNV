@@ -39,6 +39,7 @@ func main() {
 	manifestFilename := flag.String("manifest", "", "Manifest file for the array used (.csv)")
 	fastaFilename := flag.String("ref", "", "Reference fasta file for the assembly used for the GenomeStudio report.")
 	output := flag.String("o", "stdout", "Output VCF file")
+	mapmode := flag.Bool("hash", false, "Hash map lookup for snp IDs. Use for out of order data.")
 	flag.Parse()
 
 	if *gsReportFilename == "" || *manifestFilename == "" || *fastaFilename == "" {
@@ -46,7 +47,11 @@ func main() {
 		log.Fatal("ERROR: GenomeStudio report, manifest, and reference fasta files are required (-gsReport, -manifest, -ref)")
 	}
 
-	illuminaToVcf(strings.Split(*gsReportFilename, ","), *manifestFilename, *fastaFilename, *output)
+	if *mapmode {
+		illuminaToVcfMap(strings.Split(*gsReportFilename, ","), *manifestFilename, *fastaFilename, *output)
+	} else {
+		illuminaToVcf(strings.Split(*gsReportFilename, ","), *manifestFilename, *fastaFilename, *output)
+	}
 }
 
 func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output string) {
@@ -222,15 +227,201 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	exception.PanicOnErr(err)
 }
 
-func makeManifestMap(manifests []string) map[string]illumina.Manifest {
+func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output string) {
+	out := fileio.EasyCreate(output)
+	ref := fasta.NewSeeker(fastaFile, fastaFile+".fai")
+	var header vcf.Header
+	header.Text = strings.Split(headerInfo, "\n")
+
+	trimSamples := slices.Clone(gsReportFiles)
+	for i := range trimSamples {
+		trimSamples[i] = strings.TrimRight(path.Base(trimSamples[i]), ".gz")
+	}
+	header.Text[len(header.Text)-1] += "\t" + strings.Join(trimSamples, "\t")
+	vcf.NewWriteHeader(out, header)
+
+	gsReportChans := make([]<-chan illumina.GsReport, len(gsReportFiles))
+	for i := range gsReportFiles {
+		gsReportChans[i] = illumina.GoReadGsReportToChan(gsReportFiles[i])
+	}
+	mm := makeManifestMap(manifestFile)
+
+	var err error
+	var curr vcf.Vcf
+	var gs illumina.GsReport
+	curr.Filter = "."
+	curr.Format = []string{"GT", "BAF", "LRR"}
+	var alleleAint, alleleBint int16
+	var alleleA, alleleB, gsAllele1, gsAllele2 string
+	var seqBefore, seqAfter []dna.Base
+	var stringBefore, stringAfter string
+	var refBase []dna.Base
+	var altNeedsRevComp, found bool
+	var samplesWritten int
+	var m illumina.Manifest
+
+	for i := range gsReportChans {
+		gs = <-gsReportChans[i]
+		for gs.Chrom == "" || gs.Chrom == "0" {
+			gs = <-gsReportChans[i]
+			switch gs.Chrom {
+			case "xy":
+				gs.Chrom = "x"
+			case "XY":
+				gs.Chrom = "X"
+			case "MT":
+				gs.Chrom = "M"
+			}
+			if gs.Chrom == "xy" {
+				gs.Chrom = "x"
+			}
+			if gs.Chrom == "XY" {
+				gs.Chrom = "X"
+			}
+			if gs.Chrom == "MT" {
+				gs.Chrom = "M"
+			}
+		}
+
+		if i == 0 {
+			samplesWritten = 0
+			m, found = mm[strings.ToLower(gs.Marker)]
+			if !found {
+				m.Chr = "NOT_FOUND"
+				continue
+			}
+			if m.Chr == "XY" || m.Chr == "chrXY" { // SERIOUSLY ILLUMINA... SERIOUSLY
+				m.Chr = "X"
+			}
+			curr.Chr = "chr" + strings.TrimLeft(m.Chr, "chr")
+			curr.Pos = m.Pos
+			curr.Id = m.Name
+			refBase, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos-1, m.Pos)
+			exception.PanicOnErr(err)
+			curr.Ref = strings.ToUpper(dna.BaseToString(refBase[0]))
+
+			seqBefore, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), (m.Pos-1)-len(m.SeqBefore), m.Pos-1)
+			exception.PanicOnErr(err)
+			stringBefore = strings.ToUpper(dna.BasesToString(seqBefore))
+			seqAfter, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos, m.Pos+len(m.SeqAfter))
+			if err != nil {
+				fmt.Println("WARNING", err)
+			}
+			stringAfter = strings.ToUpper(dna.BasesToString(seqAfter))
+
+			// check one of the alleles matches ref
+			altNeedsRevComp = false
+			switch {
+			case levenshtein(stringBefore, m.SeqBefore) <= 5 ||
+				levenshtein(stringAfter, m.SeqAfter) <= 5: // this is a really weak match, but you would not believe the things I have seen...
+				if !m.TopStrand {
+					altNeedsRevComp = true
+				}
+
+				// only do partial check on rev comps since if snp is not directly in middle of probe then before/after lengths differ
+			case levenshtein(revComp(stringBefore)[:5], m.SeqAfter[:5]) <= 1 ||
+				levenshtein(revComp(stringAfter)[len(stringAfter)-5:], m.SeqBefore[len(m.SeqBefore)-5:]) <= 1:
+				if m.TopStrand {
+					altNeedsRevComp = true
+				}
+
+			default:
+				log.Printf("WARNING: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
+				log.Println(m.Name, m.Chr, m.Pos)
+			}
+
+			if altNeedsRevComp {
+				alleleA = revComp(m.AlleleA)
+				alleleB = revComp(m.AlleleB)
+			} else {
+				alleleA = m.AlleleA
+				alleleB = m.AlleleB
+			}
+
+			switch curr.Ref {
+			case alleleA:
+				alleleAint = 0
+				alleleBint = 1
+				curr.Alt = []string{alleleB}
+			case alleleB:
+				alleleAint = 1
+				alleleBint = 0
+				curr.Alt = []string{alleleA}
+			default:
+				if alleleA == alleleB {
+					alleleAint = 1
+					alleleBint = 1
+					curr.Alt = []string{alleleA}
+				} else {
+					alleleAint = 1
+					alleleBint = 2
+					curr.Alt = []string{alleleA, alleleB}
+				}
+			}
+
+			curr.Info = fmt.Sprintf("ALLELE_A=%d;ALLELE_B=%d;GC=%.4g", alleleAint, alleleBint, m.GC)
+			curr.Samples = make([]vcf.Sample, len(gsReportChans))
+		}
+
+		if m.Chr == "NOT_FOUND" {
+			continue
+		}
+
+		if strings.ToLower(m.Name) != strings.ToLower(gs.Marker) {
+			log.Panic("PANIC!!! DATA OUT OF ORDER")
+		}
+
+		if !matchesManifest(gs, m) {
+			if i != 0 {
+				log.Panicf("something went horibly wrong with sample %s\n%v", gsReportFiles[i], gs)
+			}
+			log.Printf("WARNING: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
+			log.Printf("waiting for %v", gs)
+			log.Println("moving to next manifest record")
+			break
+		}
+		samplesWritten++
+		gsAllele1 = gs.Allele1
+		gsAllele2 = gs.Allele2
+		if (gs.ReportedAsFwd && m.TopStrand != m.SrcTopStrand) || (!gs.ReportedAsFwd && !m.TopStrand) {
+			gsAllele1 = revComp(gsAllele1)
+			gsAllele2 = revComp(gsAllele2)
+		}
+
+		curr.Samples[i].FormatData = []string{"", fmt.Sprintf("%.4g", gs.BAlleleFreq), fmt.Sprintf("%.4g", gs.LogRRatio)}
+		switch gsAllele1 {
+		case m.AlleleA:
+			curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleAint)
+		case m.AlleleB:
+			curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleBint)
+		}
+		switch gsAllele2 {
+		case m.AlleleA:
+			curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleAint)
+		case m.AlleleB:
+			curr.Samples[i].Alleles = append(curr.Samples[i].Alleles, alleleBint)
+		}
+		curr.Samples[i].Phase = make([]bool, len(curr.Samples[i].Alleles)) // leave as false for unphased
+		gs.Chrom = ""
+
+		if i == len(gsReportChans)-1 && samplesWritten > 0 && curr.Chr != "chrM" { // exclude chrM
+			vcf.WriteVcf(out, curr)
+		}
+	}
+
+	err = out.Close()
+	exception.PanicOnErr(err)
+	err = ref.Close()
+	exception.PanicOnErr(err)
+}
+
+func makeManifestMap(manifest string) map[string]illumina.Manifest {
 	var found bool
 	m := make(map[string]illumina.Manifest)
-	for i := range manifests {
-		c := illumina.GoReadManifestToChan(manifests[i])
-		for v := range c {
-			if _, found = m[strings.ToLower(v.Name)]; !found {
-				m[strings.ToLower(v.Name)] = v
-			}
+	c := illumina.GoReadManifestToChan(manifest)
+	for v := range c {
+		if _, found = m[strings.ToLower(v.Name)]; !found {
+			m[strings.ToLower(v.Name)] = v
 		}
 	}
 	return m
