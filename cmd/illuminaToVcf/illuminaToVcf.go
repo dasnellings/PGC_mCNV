@@ -267,23 +267,23 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 				<-gsReportChans[i] // burn
 			}
 			gs = <-gsReportChans[0]
-			switch gs.Chrom {
-			case "xy":
-				gs.Chrom = "x"
-			case "XY":
-				gs.Chrom = "X"
-			case "MT":
-				gs.Chrom = "M"
-			}
-			if gs.Chrom == "xy" {
-				gs.Chrom = "x"
-			}
-			if gs.Chrom == "XY" {
-				gs.Chrom = "X"
-			}
-			if gs.Chrom == "MT" {
-				gs.Chrom = "M"
-			}
+		}
+		switch gs.Chrom {
+		case "xy":
+			gs.Chrom = "x"
+		case "XY":
+			gs.Chrom = "X"
+		case "MT":
+			gs.Chrom = "M"
+		}
+		if gs.Chrom == "xy" {
+			gs.Chrom = "x"
+		}
+		if gs.Chrom == "XY" {
+			gs.Chrom = "X"
+		}
+		if gs.Chrom == "MT" {
+			gs.Chrom = "M"
 		}
 		fmt.Println("AFTER INITIAL: ", gs)
 
@@ -374,23 +374,23 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 				fmt.Println("PRIOR: ", i, gs)
 				for gs.Chrom == "" || gs.Chrom == "0" {
 					gs = <-gsReportChans[0]
-					switch gs.Chrom {
-					case "xy":
-						gs.Chrom = "x"
-					case "XY":
-						gs.Chrom = "X"
-					case "MT":
-						gs.Chrom = "M"
-					}
-					if gs.Chrom == "xy" {
-						gs.Chrom = "x"
-					}
-					if gs.Chrom == "XY" {
-						gs.Chrom = "X"
-					}
-					if gs.Chrom == "MT" {
-						gs.Chrom = "M"
-					}
+				}
+				switch gs.Chrom {
+				case "xy":
+					gs.Chrom = "x"
+				case "XY":
+					gs.Chrom = "X"
+				case "MT":
+					gs.Chrom = "M"
+				}
+				if gs.Chrom == "xy" {
+					gs.Chrom = "x"
+				}
+				if gs.Chrom == "XY" {
+					gs.Chrom = "X"
+				}
+				if gs.Chrom == "MT" {
+					gs.Chrom = "M"
 				}
 			}
 			fmt.Println("AFTER PRIOR: ", i, gs)
