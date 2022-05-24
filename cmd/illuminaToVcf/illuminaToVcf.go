@@ -288,7 +288,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 		m, found = mm[strings.ToLower(gs.Marker)]
 		if !found {
 			m.Chr = "NOT_FOUND"
-			continue
 		}
 		if m.Chr == "XY" || m.Chr == "chrXY" { // SERIOUSLY ILLUMINA... SERIOUSLY
 			m.Chr = "X"
