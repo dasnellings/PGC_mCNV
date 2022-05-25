@@ -40,6 +40,7 @@ func main() {
 	fastaFilename := flag.String("ref", "", "Reference fasta file for the assembly used for the GenomeStudio report.")
 	output := flag.String("o", "stdout", "Output VCF file")
 	mapmode := flag.Bool("hash", false, "Hash map lookup for snp IDs. Use for out of order data.")
+	silent := flag.Bool("suppress", false, "Prevent warning messages.")
 	flag.Parse()
 
 	if *gsReportFilename == "" || *manifestFilename == "" || *fastaFilename == "" {
@@ -48,13 +49,13 @@ func main() {
 	}
 
 	if *mapmode {
-		illuminaToVcfMap(strings.Split(*gsReportFilename, ","), *manifestFilename, *fastaFilename, *output)
+		illuminaToVcfMap(strings.Split(*gsReportFilename, ","), *manifestFilename, *fastaFilename, *output, *silent)
 	} else {
-		illuminaToVcf(strings.Split(*gsReportFilename, ","), *manifestFilename, *fastaFilename, *output)
+		illuminaToVcf(strings.Split(*gsReportFilename, ","), *manifestFilename, *fastaFilename, *output, *silent)
 	}
 }
 
-func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output string) {
+func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output string, silent bool) {
 	out := fileio.EasyCreate(output)
 	ref := fasta.NewSeeker(fastaFile, fastaFile+".fai")
 	var header vcf.Header
@@ -102,7 +103,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 		exception.PanicOnErr(err)
 		stringBefore = strings.ToUpper(dna.BasesToString(seqBefore))
 		seqAfter, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos, m.Pos+len(m.SeqAfter))
-		if err != nil {
+		if err != nil && !silent {
 			fmt.Println("WARNING", err)
 		}
 		stringAfter = strings.ToUpper(dna.BasesToString(seqAfter))
@@ -124,8 +125,10 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 			}
 
 		default:
-			log.Printf("WARNING: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
-			log.Println(m.Name, m.Chr, m.Pos)
+			if !silent {
+				log.Printf("WARNING: Context sequences did not match reference:\n%s+%s\n%s+%s\n", stringBefore, stringAfter, m.SeqBefore, m.SeqAfter)
+				log.Println(m.Name, m.Chr, m.Pos)
+			}
 		}
 
 		if altNeedsRevComp {
@@ -187,9 +190,11 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				if i != 0 {
 					log.Panicf("something went horibly wrong with sample %s\n%v", gsReportFiles[i], gs)
 				}
-				log.Printf("WARNING: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
-				log.Printf("waiting for %v", gs)
-				log.Println("moving to next manifest record")
+				if !silent {
+					log.Printf("WARNING: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
+					log.Printf("waiting for %v", gs)
+					log.Println("moving to next manifest record")
+				}
 				break
 			}
 			samplesWritten++
@@ -227,7 +232,7 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 	exception.PanicOnErr(err)
 }
 
-func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output string) {
+func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output string, silent bool) {
 	out := fileio.EasyCreate(output)
 	ref := fasta.NewSeeker(fastaFile, fastaFile+".fai")
 	var header vcf.Header
@@ -308,7 +313,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 		exception.PanicOnErr(err)
 		stringBefore = strings.ToUpper(dna.BasesToString(seqBefore))
 		seqAfter, err = fasta.SeekByName(ref, "chr"+strings.TrimLeft(m.Chr, "chr"), m.Pos, m.Pos+len(m.SeqAfter))
-		if err != nil {
+		if err != nil && !silent {
 			fmt.Println("WARNING", err)
 		}
 		stringAfter = strings.ToUpper(dna.BasesToString(seqAfter))
@@ -399,7 +404,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 				log.Panic("PANIC!!! DATA OUT OF ORDER")
 			}
 
-			if !matchesManifest(gs, m) {
+			if !matchesManifest(gs, m) && !silent {
 				log.Printf("WARNING: Manifest mismatch. See report and manifest data below\n%v\n%v\n", gs, m)
 			}
 			samplesWritten++
