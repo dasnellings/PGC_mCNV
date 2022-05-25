@@ -127,9 +127,9 @@ func processGsHeader3(s string) GsReport {
 	//exception.PanicOnErr(err)
 	//ans.Y, err = strconv.ParseFloat(fields[6], 64)
 	//exception.PanicOnErr(err)
-	ans.BAlleleFreq, err = strconv.ParseFloat(fields[7], 64)
+	ans.BAlleleFreq, err = strconv.ParseFloat(fields[8], 64)
 	exception.PanicOnErr(err)
-	ans.LogRRatio, err = strconv.ParseFloat(fields[8], 64)
+	ans.LogRRatio, err = strconv.ParseFloat(fields[7], 64)
 	exception.PanicOnErr(err)
 	ans.ReportedAsFwd = false
 	return ans
