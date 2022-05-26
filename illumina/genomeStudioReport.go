@@ -40,7 +40,7 @@ func readReportToChan(filename string, ans chan<- GsReport) {
 	var processFunc func(string) GsReport
 	for line, done := fileio.EasyNextRealLine(file); !done; line, done = fileio.EasyNextRealLine(file) {
 		line = strings.TrimRight(line, "\t") // remove trailing tab
-		if strings.HasPrefix(line, "SNP Name") {
+		if strings.HasPrefix(line, "SNP Name") || strings.HasPrefix(line, "sample.id") {
 			switch line {
 			case gsHeader1:
 				processFunc = processGsHeader1
