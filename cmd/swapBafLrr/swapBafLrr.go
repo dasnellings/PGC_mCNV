@@ -14,11 +14,13 @@ func main() {
 	o := fileio.EasyCreate(out)
 	data, header := vcf.GoReadToChan(file)
 	vcf.NewWriteHeader(o, header)
-	for v := range data {
+	var i int
+	var v vcf.Vcf
+	for v = range data {
 		if v.Format[1] != "BAF" || v.Format[2] != "LRR" {
 			log.Panicln("baf and lrr out of order or not found")
 		}
-		for i := range v.Samples {
+		for i = range v.Samples {
 			v.Samples[i].FormatData[1], v.Samples[i].FormatData[2] = v.Samples[i].FormatData[2], v.Samples[i].FormatData[1]
 		}
 		vcf.WriteVcf(o, v)

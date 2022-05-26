@@ -12,6 +12,7 @@ const gsHeader1 string = "SNP Name\tChromosome\tPosition\tAl1Fwd\tAl2Fwd\tX\tY\t
 const gsHeader2 string = "SNP Name\tChr\tPosition\tAllele1 - Forward\tAllele2 - Forward\tX Raw\tY Raw\tX\tY\tTheta\tB Allele Freq\tLog R Ratio\tR\tAllele1 - Top\tAllele2 - Top\tGC Score\tGT Score\tCluster Sep"
 const gsHeader3 string = "SNP Name\tChr\tPosition\tAllele1 - Top\tAllele2 - Top\tX\tY\tLog R Ratio\tB Allele Freq"
 const gsHeader4 string = "SNP Name\tChr\tPosition\tAl1Fwd\tAl2Fwd\tX\tY\tB Allele Freq\tLog R Ratio"
+const gsHeader5 string = "SNP Name\tChromosome\tPosition\tGC Score\tAllele1 - Top\tAllele2 - Top\tAllele1 - AB\tAllele2 - AB\tX\tY\tRaw X\tRaw Y\tR Illumina\tTheta Illumina\tB Allele Freq\tLog R Ratio"
 
 type GsReport struct {
 	Marker  string
@@ -48,6 +49,8 @@ func readReportToChan(filename string, ans chan<- GsReport) {
 				processFunc = processGsHeader3
 			case gsHeader4:
 				processFunc = processGsHeader1
+			case gsHeader5:
+				processFunc = processGsHeader5
 			default:
 				log.Fatalf("ERROR: unexpected report header. check file.\n%v\n%v", line)
 			}
@@ -130,6 +133,27 @@ func processGsHeader3(s string) GsReport {
 	ans.BAlleleFreq, err = strconv.ParseFloat(fields[8], 64)
 	exception.PanicOnErr(err)
 	ans.LogRRatio, err = strconv.ParseFloat(fields[7], 64)
+	exception.PanicOnErr(err)
+	ans.ReportedAsFwd = false
+	return ans
+}
+
+func processGsHeader5(s string) GsReport {
+	var ans GsReport
+	var err error
+	fields := strings.Split(s, "\t")
+	if len(fields) != 9 {
+		log.Panicf("ERROR: following lines has unexpected number of columns:\n%s", s)
+	}
+	ans.Marker = fields[0]
+	ans.Chrom = fields[1]
+	ans.Pos, err = strconv.Atoi(fields[2])
+	exception.PanicOnErr(err)
+	ans.Allele1 = strings.ToUpper(fields[4])
+	ans.Allele2 = strings.ToUpper(fields[5])
+	ans.BAlleleFreq, err = strconv.ParseFloat(fields[14], 64)
+	exception.PanicOnErr(err)
+	ans.LogRRatio, err = strconv.ParseFloat(fields[15], 64)
 	exception.PanicOnErr(err)
 	ans.ReportedAsFwd = false
 	return ans
