@@ -401,7 +401,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 			}
 			if strings.ToLower(m.Name) != strings.ToLower(gs.Marker) {
 				log.Print(m)
-				log.Print(gs)
+				log.Print(gsReportFiles[i], gs)
 				log.Panic("PANIC!!! DATA OUT OF ORDER")
 			}
 
