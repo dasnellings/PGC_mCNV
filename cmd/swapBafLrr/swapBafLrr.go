@@ -18,8 +18,8 @@ func main() {
 		if v.Format[1] != "BAF" || v.Format[2] != "LRR" {
 			log.Panicln("baf and lrr out of order or not found")
 		}
-		for _, i := range v.Samples {
-			i.FormatData[1], i.FormatData[2] = i.FormatData[2], i.FormatData[1]
+		for i := range v.Samples {
+			v.Samples[i].FormatData[1], v.Samples[i].FormatData[2] = v.Samples[i].FormatData[2], v.Samples[i].FormatData[1]
 		}
 		vcf.WriteVcf(o, v)
 	}
