@@ -63,9 +63,6 @@ func readReportToChan(filename string, ans chan<- GsReport) {
 		if strings.ToLower(gs.Chrom) == "mt" {
 			gs.Chrom = "M"
 		}
-		if gs.Chrom == "NA" {
-			continue
-		}
 		ans <- gs
 	}
 	err := file.Close()
@@ -179,7 +176,7 @@ func processGsHeader6(s string) GsReport {
 	ans.Allele1 = strings.ToUpper(fields[4])
 	ans.Allele2 = strings.ToUpper(fields[5])
 	if ans.Allele1 == "-" || ans.Allele2 == "-" {
-		ans.Chrom = "NA"
+		ans.Chrom = ""
 		return ans
 	}
 	ans.BAlleleFreq, err = strconv.ParseFloat(fields[8], 64)
