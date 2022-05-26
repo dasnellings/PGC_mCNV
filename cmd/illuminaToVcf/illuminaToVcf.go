@@ -376,6 +376,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 				gs = <-gsReportChans[i]
 				for gs.Chrom == "" || gs.Chrom == "0" {
 					gs = <-gsReportChans[0]
+					log.Println("skipped", gs)
 				}
 				switch gs.Chrom {
 				case "xy":
