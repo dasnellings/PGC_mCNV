@@ -142,7 +142,7 @@ func processGsHeader5(s string) GsReport {
 	var ans GsReport
 	var err error
 	fields := strings.Split(s, "\t")
-	if len(fields) != 9 {
+	if len(fields) != 16 {
 		log.Panicf("ERROR: following lines has unexpected number of columns:\n%s", s)
 	}
 	ans.Marker = fields[0]
