@@ -246,7 +246,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 
 	var err error
 	var curr vcf.Vcf
-	var ok bool
 	var gs illumina.GsReport
 	curr.Filter = "."
 	curr.Format = []string{"GT", "BAF", "LRR"}
