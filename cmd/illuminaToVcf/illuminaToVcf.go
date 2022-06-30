@@ -246,6 +246,7 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 
 	var err error
 	var curr vcf.Vcf
+	var ok bool
 	var gs illumina.GsReport
 	curr.Filter = "."
 	curr.Format = []string{"GT", "BAF", "LRR"}
@@ -260,20 +261,23 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 
 	for gs = range gsReportChans[0] {
 		if debug > 0 {
-			fmt.Println("debug: started - ", gs)
+			fmt.Println("debug: started -", gs, gsReportFiles[0])
 		}
 		for gs.Chrom == "" || gs.Chrom == "0" {
 			if debug > 0 {
-				fmt.Println("debug: no chrom for - ", gs)
+				fmt.Println("debug: no chrom for -", gs, gsReportFiles[0])
 			}
 			for i := 1; i < len(gsReportChans); i++ {
 				if debug > 0 {
-					fmt.Println("debug: burning - ", <-gsReportChans[i])
+					fmt.Println("debug: burning -", <-gsReportChans[i], gsReportFiles[i])
 				} else {
 					<-gsReportChans[i] // burn
 				}
 			}
 			gs = <-gsReportChans[0]
+			if gs.Chrom == "" {
+				log.Panic("something went horribly wrong")
+			}
 		}
 		switch gs.Chrom {
 		case "xy":
