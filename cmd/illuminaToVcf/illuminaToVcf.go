@@ -16,6 +16,8 @@ import (
 	"strings"
 )
 
+const debug int = 1
+
 const headerInfo string = "##fileformat=VCFv4.2\n" +
 	"##INFO=<ID=ALLELE_A,Number=1,Type=Integer,Description=\"A allele\">\n" +
 	"##INFO=<ID=ALLELE_B,Number=1,Type=Integer,Description=\"B allele\">\n" +
@@ -175,15 +177,6 @@ func illuminaToVcf(gsReportFiles []string, manifestFile, fastaFile, output strin
 				case "MT":
 					gs.Chrom = "M"
 				}
-				if gs.Chrom == "xy" {
-					gs.Chrom = "x"
-				}
-				if gs.Chrom == "XY" {
-					gs.Chrom = "X"
-				}
-				if gs.Chrom == "MT" {
-					gs.Chrom = "M"
-				}
 			}
 
 			if !matchesManifest(gs, m) {
@@ -266,9 +259,19 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 	var m illumina.Manifest
 
 	for gs = range gsReportChans[0] {
+		if debug > 0 {
+			fmt.Println("debug: started - ", gs)
+		}
 		for gs.Chrom == "" || gs.Chrom == "0" {
+			if debug > 0 {
+				fmt.Println("debug: no chrom for - ", gs)
+			}
 			for i := 1; i < len(gsReportChans); i++ {
-				<-gsReportChans[i] // burn
+				if debug > 0 {
+					fmt.Println("debug: burning - ", <-gsReportChans[i])
+				} else {
+					<-gsReportChans[i] // burn
+				}
 			}
 			gs = <-gsReportChans[0]
 		}
@@ -278,15 +281,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 		case "XY":
 			gs.Chrom = "X"
 		case "MT":
-			gs.Chrom = "M"
-		}
-		if gs.Chrom == "xy" {
-			gs.Chrom = "x"
-		}
-		if gs.Chrom == "XY" {
-			gs.Chrom = "X"
-		}
-		if gs.Chrom == "MT" {
 			gs.Chrom = "M"
 		}
 
@@ -384,15 +378,6 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 				case "XY":
 					gs.Chrom = "X"
 				case "MT":
-					gs.Chrom = "M"
-				}
-				if gs.Chrom == "xy" {
-					gs.Chrom = "x"
-				}
-				if gs.Chrom == "XY" {
-					gs.Chrom = "X"
-				}
-				if gs.Chrom == "MT" {
 					gs.Chrom = "M"
 				}
 			}
