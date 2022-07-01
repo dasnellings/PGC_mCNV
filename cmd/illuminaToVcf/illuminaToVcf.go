@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const debug int = 1
+const debug int = 0
 
 const headerInfo string = "##fileformat=VCFv4.2\n" +
 	"##INFO=<ID=ALLELE_A,Number=1,Type=Integer,Description=\"A allele\">\n" +
@@ -275,7 +275,11 @@ func illuminaToVcfMap(gsReportFiles []string, manifestFile, fastaFile, output st
 			}
 			gs = <-gsReportChans[0]
 			if gs.Chrom == "" {
-				log.Panic("something went horribly wrong")
+				err = out.Close()
+				exception.PanicOnErr(err)
+				err = ref.Close()
+				exception.PanicOnErr(err)
+				return
 			}
 		}
 		switch gs.Chrom {
