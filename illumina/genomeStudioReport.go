@@ -192,7 +192,7 @@ func processGsHeader6(s string) GsReport {
 	ans.Allele1 = strings.ToUpper(fields[4])
 	ans.Allele2 = strings.ToUpper(fields[5])
 	if ans.Allele1 == "-" || ans.Allele2 == "-" || strings.Contains(s, "\tNA\t") || fields[8] == "NA" || fields[9] == "NA" {
-		return ans
+		// return ans
 	}
 	ans.BAlleleFreq, err = strconv.ParseFloat(fields[8], 64)
 	exception.PanicOnErr(err)
@@ -216,7 +216,7 @@ func processGsHeader7(s string) GsReport {
 	ans.Allele1 = strings.ToUpper(string(fields[8][0]))
 	ans.Allele2 = strings.ToUpper(string(fields[8][1]))
 	if ans.Allele1 == "-" || ans.Allele2 == "-" || strings.Contains(s, "\tNA\t") || fields[8] == "NA" || fields[9] == "NA" || fields[8] == "II" {
-		return ans
+		// return ans
 	}
 	ans.BAlleleFreq, err = strconv.ParseFloat(fields[3], 64)
 	exception.PanicOnErr(err)
